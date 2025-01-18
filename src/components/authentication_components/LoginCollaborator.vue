@@ -13,7 +13,7 @@
       >
         <!-- Contenido del primer componente -->
         <div class="mt-16">
-          <img :src="'/src/assets/ealimentacion.png'" />
+          <img :src="ealimentacion" alt="Ealimentacion" />
         </div>
       </v-col>
 
@@ -73,7 +73,6 @@
                 block
                 class="lowercase-button"
                 :loading="loading"
-                @click="browseDashboard"
                 >Iniciar sesión</v-btn
               >
             </v-col>
@@ -109,6 +108,12 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, watchEffect } from "vue";
+import ealimentacion from '@/assets/ealimentacion.png';
+
+const router = useRouter();
+const setUser = ref("");
+const setPassword = ref("");
+const loading = ref(false);
 const show1 = ref(false);
 const rules = ref({
   required: (value) => !!value || "Requiredo",

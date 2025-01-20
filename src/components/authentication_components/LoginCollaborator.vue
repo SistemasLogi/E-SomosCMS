@@ -73,6 +73,7 @@
                 block
                 class="lowercase-button"
                 :loading="loading"
+                @click="browseDashboard"
                 >Iniciar sesión</v-btn
               >
             </v-col>
@@ -98,7 +99,7 @@
                   ></v-divider>
                 </v-col>
               </v-row>
-            </v-col>            
+            </v-col>
           </v-row>
         </v-responsive>
       </v-col>
@@ -108,16 +109,75 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, watchEffect } from "vue";
-import ealimentacion from '@/assets/ealimentacion.png';
+import ealimentacion from "@/assets/ealimentacion.png";
+import { UserAuthQueries } from "@/graphql/queries/auth_queries";
+import { graphqlServerUrl } from "@/graphql/config";
+import axios from "axios";
 
 const router = useRouter();
 const setUser = ref("");
+const formRef = ref(null);
 const setPassword = ref("");
 const loading = ref(false);
 const show1 = ref(false);
+const message = ref("");
 const rules = ref({
   required: (value) => !!value || "Requiredo",
 });
+
+const getTokenWithUserPassword = async (user, password) => {
+  loading.value = true;
+  message.value = "";
+  const initialQuery = UserAuthQueries.getTokenAuth(user, password);
+  console.log(initialQuery);
+  try {
+    const response = await axios.post(graphqlServerUrl, {
+      query: initialQuery,
+    });
+
+    const { data } = response;
+
+    if (data && data.data) {
+      const dataQuery = data.data;
+      const {
+        status_code,
+        status_message,
+        accessToken,
+        encryptedKey,
+        permissions,
+      } = dataQuery.loginCollaborator;
+
+      if (status_code === 200) {
+        loading.value = false;
+        localStorage.setItem("TokenCollaborator", accessToken);
+        localStorage.setItem("EncryptedKeyCollaborator", encryptedKey);
+        localStorage.setItem("AccessCollaborator", JSON.stringify(permissions));
+        console.log("Permisos: ", permissions);
+        //router.push("/clientes/dashboard");
+      } else {
+        console.log(status_message);
+        message.value = status_message;
+        loading.value = false;
+      }
+    } else {
+      console.log(
+        data.errors?.[0]?.extensions?.debugMessage || "Unexpected error"
+      );
+      loading.value = false;
+    }
+  } catch (error) {
+    console.error("Error: ", error);
+    loading.value = false;
+  }
+};
+
+const browseDashboard = async () => {
+  const { valid } = await formRef.value.validate();
+  if (valid) {
+    console.log("valido");
+    getTokenWithUserPassword(setUser.value, setPassword.value);
+  }
+};
 </script>
 <style scoped>
 .col-1 {

@@ -4,17 +4,20 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
-// Plugins
-import { registerPlugins } from '@/plugins'
-
 // Components
 import App from './App.vue'
 
-// Composables
-import { createApp } from 'vue'
+// Plugins
+import { registerPlugins } from '@/plugins'
 
-const app = createApp(App)
+import * as Vue from 'vue' 
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+const app = Vue.createApp(App)
 
 registerPlugins(app)
+
+app.use(VueAxios, axios)
 
 app.mount('#app')

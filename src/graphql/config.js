@@ -2,4 +2,4 @@ export const graphqlServerUrl = "https://e-somos.grupologi.com.co/cms-GraphQL/pu
 
 export const graphqlImagesUrl = "https://e-somos.grupologi.com.co/cms-GraphQL/storage/app/public/";
 
-export const logoCompany = "./src/assets/efontibon.png";
+export const logoCompany = new URL("@/assets/efontibon.png", import.meta.url).href;

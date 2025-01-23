@@ -13,7 +13,7 @@
       >
         <!-- Contenido del primer componente -->
         <div class="mt-16">
-          <img :src="ealimentacion" alt="Ealimentacion" />
+          <img :src="logoCompany" alt="Ealimentacion" />
         </div>
       </v-col>
 
@@ -111,7 +111,7 @@ import { useRouter } from "vue-router";
 import { ref, watchEffect } from "vue";
 import ealimentacion from "@/assets/ealimentacion.png";
 import { UserAuthQueries } from "@/graphql/queries/auth_queries";
-import { graphqlServerUrl } from "@/graphql/config";
+import { graphqlServerUrl, logoCompany } from "@/graphql/config";
 import axios from "axios";
 
 const router = useRouter();
@@ -149,11 +149,11 @@ const getTokenWithUserPassword = async (user, password) => {
 
       if (status_code === 200) {
         loading.value = false;
-        localStorage.setItem("TokenCollaborator", accessToken);
-        localStorage.setItem("EncryptedKeyCollaborator", encryptedKey);
-        localStorage.setItem("AccessCollaborator", JSON.stringify(permissions));
+        localStorage.setItem("TokenCollaboratorCms", accessToken);
+        localStorage.setItem("EncryptedKeyCollaboratorCms", encryptedKey);
+        localStorage.setItem("AccessCollaboratorCms", JSON.stringify(permissions));
         console.log("Permisos: ", permissions);
-        //router.push("/clientes/dashboard");
+        router.push("/colaboradores");
       } else {
         console.log(status_message);
         message.value = status_message;
@@ -181,7 +181,7 @@ const browseDashboard = async () => {
 </script>
 <style scoped>
 .col-1 {
-  background-color: #dad9d7; /* Color de fondo para la primera columna */
+  background-color: #c5c5c5; /* Color de fondo para la primera columna */
 }
 
 .col-2 {

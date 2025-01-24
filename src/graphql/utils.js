@@ -64,12 +64,6 @@ export const decodeJwt = (token) => {
 //{ title: "Dashboard", icon: "mdi-view-dashboard-variant", permission: 0, route: { name: "CustomerDashboard" }},//
 export const menuItems = [
   {
-    title: "Dashboard",
-    icon: "mdi-view-dashboard-variant",
-    permission: 0,
-    route: { name: "Dashboard" },
-  },
-  {
     title: "Publicaciones",
     icon: "mdi-publish",
     permission: 1,

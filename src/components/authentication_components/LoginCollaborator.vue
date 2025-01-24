@@ -1,37 +1,19 @@
 <template>
   <v-card rounded="0">
-    <v-row>
+    <v-row class="g-0">
+      <!-- Columna del formulario -->
       <v-col
-        class="col-1 full-height"
-        align="center"
-        sm="12"
-        md="12"
-        lg="8"
-        order-sm="2"
-        order-md="2"
-        order-lg="1"
-      >
-        <!-- Contenido del primer componente -->
-        <div class="mt-16">
-          <img :src="logoCompany" alt="Ealimentacion" />
-        </div>
-      </v-col>
-
-      <v-col
-        class="col-2 full-height"
-        sm="12"
-        md="12"
+        class="col-form full-height"
+        cols="12"
         lg="4"
-        order-sm="1"
-        order-md="1"
+        order="1"
         order-lg="2"
       >
-        <!-- Contenido del segundo componente -->
-        <v-responsive class="align-center text-center fill-height">
+        <v-responsive class="align-center text-center fill-height pa-4">
           <v-row class="align-center">
             <v-col cols="12">
-              <h1>Iniciar sesión</h1>
-              <h3>¡Ingresa aquí!</h3>
+              <h1 class="mb-1">Iniciar sesión</h1>
+              <h3 class="mb-6">¡Ingresa aquí!</h3>
             </v-col>
           </v-row>
 
@@ -44,10 +26,10 @@
                   append-inner-icon="mdi-account"
                   bg-color="white"
                   color="primary"
-                  base-color="primary"
                   label="Usuario"
                   variant="outlined"
                   density="compact"
+                  class="mb-4"
                 ></v-text-field>
                 <v-text-field
                   v-model="setPassword"
@@ -56,7 +38,6 @@
                   :type="show1 ? 'text' : 'password'"
                   bg-color="white"
                   color="primary"
-                  base-color="primary"
                   label="Contraseña"
                   @click:append-inner="show1 = !show1"
                   variant="outlined"
@@ -67,48 +48,54 @@
           </v-form>
 
           <v-row justify="center" dense>
-            <v-col aling-self="end" cols="10">
+            <v-col cols="10">
               <v-btn
                 color="primary"
                 block
                 class="lowercase-button"
                 :loading="loading"
                 @click="browseDashboard"
-                >Iniciar sesión</v-btn
               >
+                Iniciar sesión
+              </v-btn>
+              <span class="mt-2 text-danger">
+                <em>{{ message }}</em>
+              </span>
             </v-col>
-            <span
-              ><em>{{ message }}</em></span
-            >
-
             <v-col cols="10">
               <v-row justify="center">
                 <v-col class="mt-3" cols="5">
-                  <v-divider
-                    class="border-opacity-25"
-                    thickness="1"
-                  ></v-divider>
+                  <v-divider thickness="1"></v-divider>
                 </v-col>
                 <v-col cols="2">
                   <p class="text-medium-emphasis">o</p>
                 </v-col>
                 <v-col class="mt-3" cols="5">
-                  <v-divider
-                    class="border-opacity-25"
-                    thickness="1"
-                  ></v-divider>
+                  <v-divider thickness="1"></v-divider>
                 </v-col>
               </v-row>
             </v-col>
           </v-row>
         </v-responsive>
       </v-col>
+
+      <!-- Columna de la imagen -->
+      <v-col
+        class="col-image full-height d-flex justify-center align-center"
+        cols="12"
+        lg="8"
+        order="2"
+        order-lg="1"
+      >
+        <img :src="logoCompany" alt="Ealimentacion" class="responsive-image" />
+      </v-col>
     </v-row>
   </v-card>
 </template>
+
 <script setup>
 import { useRouter } from "vue-router";
-import { ref, watchEffect } from "vue";
+import { ref } from "vue";
 import ealimentacion from "@/assets/ealimentacion.png";
 import { UserAuthQueries } from "@/graphql/queries/auth_queries";
 import { graphqlServerUrl, logoCompany } from "@/graphql/config";
@@ -122,14 +109,13 @@ const loading = ref(false);
 const show1 = ref(false);
 const message = ref("");
 const rules = ref({
-  required: (value) => !!value || "Requiredo",
+  required: (value) => !!value || "Requerido",
 });
 
 const getTokenWithUserPassword = async (user, password) => {
   loading.value = true;
   message.value = "";
   const initialQuery = UserAuthQueries.getTokenAuth(user, password);
-  console.log(initialQuery);
   try {
     const response = await axios.post(graphqlServerUrl, {
       query: initialQuery,
@@ -138,35 +124,29 @@ const getTokenWithUserPassword = async (user, password) => {
     const { data } = response;
 
     if (data && data.data) {
-      const dataQuery = data.data;
       const {
         status_code,
         status_message,
         accessToken,
         encryptedKey,
         permissions,
-      } = dataQuery.loginCollaborator;
+      } = data.data.loginCollaborator;
 
       if (status_code === 200) {
-        loading.value = false;
         localStorage.setItem("TokenCollaboratorCms", accessToken);
         localStorage.setItem("EncryptedKeyCollaboratorCms", encryptedKey);
-        localStorage.setItem("AccessCollaboratorCms", JSON.stringify(permissions));
-        console.log("Permisos: ", permissions);
+        localStorage.setItem(
+          "AccessCollaboratorCms",
+          JSON.stringify(permissions)
+        );
         router.push("/colaboradores");
       } else {
-        console.log(status_message);
         message.value = status_message;
-        loading.value = false;
       }
-    } else {
-      console.log(
-        data.errors?.[0]?.extensions?.debugMessage || "Unexpected error"
-      );
-      loading.value = false;
     }
   } catch (error) {
     console.error("Error: ", error);
+  } finally {
     loading.value = false;
   }
 };
@@ -174,20 +154,31 @@ const getTokenWithUserPassword = async (user, password) => {
 const browseDashboard = async () => {
   const { valid } = await formRef.value.validate();
   if (valid) {
-    console.log("valido");
     getTokenWithUserPassword(setUser.value, setPassword.value);
   }
 };
 </script>
+
 <style scoped>
-.col-1 {
-  background-color: #c5c5c5; /* Color de fondo para la primera columna */
+.full-height {
+  height: 100vh;
 }
 
-.col-2 {
-  background-color: #eeeeee; /* Color de fondo para la segunda columna */
+.col-form {
+  background-color: #eeeeee;
+  padding: 1rem;
 }
-.full-height {
-  height: calc(100vh + 24px);
+
+.col-image {
+  background-color: #c5c5c5;
+}
+
+.responsive-image {
+  max-width: 100%;
+  max-height: 50%;
+}
+
+.lowercase-button {
+  text-transform: none;
 }
 </style>

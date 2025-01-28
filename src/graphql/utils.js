@@ -78,6 +78,7 @@ export const menuItems = [
         title: "Slider Principal",
         icon: "mdi-view-carousel",
         permission: 3,
+        route: { name: "PrincipalSlider" },
       },
       {
         title: "Enlaces de Interés",

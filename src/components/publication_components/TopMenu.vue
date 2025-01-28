@@ -190,7 +190,8 @@
           rounded="lg"
           text="Guardar"
           variant="flat"
-          @click="validateDataForm"
+          :loading="loadingBtn"
+          @click="validateDataForm(1)"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -235,7 +236,8 @@
           rounded="lg"
           text="Guardar"
           variant="flat"
-          @click="validateDataForm"
+          :loading="loadingBtn"
+          @click="validateDataForm(2)"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -268,14 +270,14 @@ import { shallowRef, ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   graphqlServerUrl,
-  graphqlImagesUrl,
-  logoCompany,
+  graphqlImagesUrl
 } from "@/graphql/config";
 import {
   checkLocalStorageData,
   getTokenRefreshKeyCollaborator,
 } from "@/graphql/utils";
 import { PublicationPublicQueries } from "@/graphql/queries/publication_queries";
+import { PublicationMutations } from "@/graphql/mutations/publication_mutations";
 
 const density = shallowRef("compact");
 
@@ -284,8 +286,11 @@ const visibleDialogLight = ref(false);
 const visibleDialogDark = ref(false);
 const visibleError = ref(false);
 const loading = ref(true);
+const loadingBtn = ref(false);
 const logoLight = ref("");
 const logoDark = ref("");
+const idLight = ref(null);
+const idDark = ref(null);
 const textDialog = ref("");
 const codeError = ref("");
 const uploadedFile = ref(null); // Aquí se almacenará el archivo cargado
@@ -345,13 +350,16 @@ const getDataMenu = async (id) => {
           (section) => section.section_title === "dark"
         );
 
-        // Asignar valores a los logos
+        // Asignar valores a los logos y los IDs de las secciones
         logoLight.value = lightSection
           ? `${graphqlImagesUrl}/${lightSection.url_header_image}`
           : "";
         logoDark.value = darkSection
           ? `${graphqlImagesUrl}/${darkSection.url_header_image}`
           : "";
+
+        idLight.value = lightSection ? lightSection.id : null;
+        idDark.value = darkSection ? darkSection.id : null;
       } else {
         handleError({
           code: status_code,
@@ -363,6 +371,118 @@ const getDataMenu = async (id) => {
     console.error("Error: ", error);
   } finally {
     loading.value = false;
+  }
+};
+
+const updateSectionWithImage = async (
+  sectionId,
+  cmsItemId,
+  sectionTitle,
+  sectionType,
+  fileImgHeader
+) => {
+  loadingBtn.value = true;
+  const initialMutation = PublicationMutations.setUpsertSection({
+    id: sectionId,
+    cms_item_id: cmsItemId,
+    section_title: sectionTitle,
+    section_type: sectionType,
+    img_header: true,
+  });
+
+  console.log("Query generado:", initialMutation);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "multipart/form-data",
+  };
+
+  const formData = new FormData();
+  formData.append(
+    "operations",
+    JSON.stringify({
+      query: initialMutation,
+      variables: {
+        img_header: null,
+      },
+    })
+  );
+  formData.append("map", JSON.stringify({ 1: ["variables.img_header"] }));
+  formData.append("1", fileImgHeader);
+
+  const datos = await axios.post(graphqlServerUrl, formData, { headers });
+  console.log(datos.data.data);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, section } =
+        dataMutation.upsertSection;
+
+      if (status_code === 200) {
+        if (sectionTitle === "light") {
+          idLight.value = section.id;
+          logoLight.value = `${graphqlImagesUrl}/${section.url_header_image}`;
+        } else if (sectionTitle === "dark") {
+          idDark.value = section.id;
+          logoDark.value = `${graphqlImagesUrl}/${section.url_header_image}`;
+        }
+        loadingBtn.value = false;
+        closeDialogLight();
+        closeDialogDark();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(
+          updateSectionWithImage(
+            sectionId,
+            cmsItemId,
+            sectionTitle,
+            sectionType,
+            fileImgHeader
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(
+        updateSectionWithImage(
+          sectionId,
+          cmsItemId,
+          sectionTitle,
+          sectionType,
+          fileImgHeader
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const refreshTokenAndRetry = async (callback) => {
+  const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
+  const responseRefresh = await getTokenRefreshKeyCollaborator(encriptedKey);
+
+  if (responseRefresh.code === 200) {
+    //console.log(responseRefresh.message);
+    await callback();
+  } else {
+    handleError({
+      code: responseRefresh.code,
+      message: responseRefresh.message,
+    });
   }
 };
 
@@ -383,7 +503,7 @@ const onFileChange = (event) => {
 };
 
 // Función para validar los datos del formulario (archivo cargado)
-const validateDataForm = async () => {
+const validateDataForm = async (identifier) => {
   // Validar que se ha cargado un archivo
   if (!uploadedFile.value) {
     errorMessage.value = "No se ha cargado ningún archivo."; // Mensaje de error si no se cargó archivo
@@ -404,6 +524,21 @@ const validateDataForm = async () => {
 
   // Si pasa todas las validaciones, entonces se puede continuar
   console.log("Archivo válido:", uploadedFile.value);
+
+  // 1 = light, 2 = dark
+  if (identifier === 1) {
+    updateSectionWithImage(
+      idLight.value,
+      6,
+      "light",
+      "div",
+      uploadedFile.value
+    );
+  } else if (identifier === 2) {
+    updateSectionWithImage(idDark.value, 6, "dark", "div", uploadedFile.value);
+  } else {
+    console.log("Identificador no válido");
+  }
 };
 
 const handleError = (response) => {

@@ -23,6 +23,12 @@ export default [
           component: () =>
             import("@/components/publication_components/TopMenu.vue"),          
         },
+        {
+          path: "slider-principal",
+          name: "PrincipalSlider",
+          component: () =>
+            import("@/components/publication_components/SliderPrincipal.vue"),          
+        },
       ]
     },
   ];

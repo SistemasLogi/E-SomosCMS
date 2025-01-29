@@ -84,6 +84,7 @@ export const menuItems = [
         title: "Enlaces de Interés",
         icon: "mdi-link-plus",
         permission: 4,
+        route: { name: "EnlacesInteres" },
       },
       {
         title: "Pagina de Nosotros",

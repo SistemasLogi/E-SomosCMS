@@ -29,6 +29,12 @@ export default [
           component: () =>
             import("@/components/publication_components/SliderPrincipal.vue"),          
         },
+        {
+          path: "enlaces-interes",
+          name: "EnlacesInteres",
+          component: () =>
+            import("@/components/publication_components/InterestLinks.vue"),          
+        },
       ]
     },
   ];

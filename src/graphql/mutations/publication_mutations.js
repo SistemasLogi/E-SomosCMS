@@ -75,4 +75,14 @@ export const PublicationMutations = {
         }
       `;
   },
+
+  setDeleteSection: (section_id) => `
+    mutation {
+      deleteSection(id: ${section_id}) {
+        status
+        status_code
+        status_message
+      }
+    }
+    `,
 };

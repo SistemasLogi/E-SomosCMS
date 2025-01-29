@@ -390,7 +390,7 @@ const updateSectionWithImage = async (
     img_header: true,
   });
 
-  console.log("Query generado:", initialMutation);
+  //console.log("Query generado:", initialMutation);
 
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
@@ -412,7 +412,7 @@ const updateSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos.data.data);
+  //console.log(datos.data.data);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -499,7 +499,7 @@ const onFileChange = (event) => {
   }
 
   // Verificar el archivo cargado
-  console.log("Archivo asignado:", uploadedFile.value);
+  //console.log("Archivo asignado:", uploadedFile.value);
 };
 
 // Función para validar los datos del formulario (archivo cargado)
@@ -523,7 +523,7 @@ const validateDataForm = async (identifier) => {
   }
 
   // Si pasa todas las validaciones, entonces se puede continuar
-  console.log("Archivo válido:", uploadedFile.value);
+  //console.log("Archivo válido:", uploadedFile.value);
 
   // 1 = light, 2 = dark
   if (identifier === 1) {
@@ -574,7 +574,7 @@ onMounted(async () => {
 
   // Lógica basada en si el token existe o no
   if (tokenExists) {
-    console.log("EXISTE");
+    //console.log("EXISTE");
     await getDataMenu(6);
   } else {
     router.push("/");

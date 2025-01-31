@@ -19,6 +19,11 @@ export const PublicationPublicQueries = {
                     url_header_image
                     url_card_image
                     section_type
+                    entryes{
+                        id
+                        section_id
+                        entry_title
+                    }
                 }
             }
         }

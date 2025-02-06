@@ -207,7 +207,7 @@ const dataUserCollaborator = async () => {
         if (
           datos.data.errors[0].extensions.debugMessage == "Token has expired"
         ) {
-          await refreshTokenAndRetry(dataUserCollaborator);
+          await refreshTokenAndRetry(() => dataUserCollaborator());
         } else {
           handleError({ code: 500, message: "Unexpected error" });
         }
@@ -215,7 +215,7 @@ const dataUserCollaborator = async () => {
     } catch (error) {
       console.log(datos.data.errors[0].extensions.debugMessage);
       if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-        await refreshTokenAndRetry(dataUserCollaborator);
+        await refreshTokenAndRetry(() => dataUserCollaborator());
       }
     }
   } catch (error) {

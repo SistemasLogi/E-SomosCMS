@@ -268,10 +268,7 @@
 import axios from "axios";
 import { shallowRef, ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  graphqlServerUrl,
-  graphqlImagesUrl
-} from "@/graphql/config";
+import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
 import {
   checkLocalStorageData,
   getTokenRefreshKeyCollaborator,
@@ -438,7 +435,7 @@ const updateSectionWithImage = async (
       }
     } else {
       if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-        await refreshTokenAndRetry(
+        await refreshTokenAndRetry(() =>
           updateSectionWithImage(
             sectionId,
             cmsItemId,
@@ -456,7 +453,7 @@ const updateSectionWithImage = async (
     }
   } catch (error) {
     if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-      await refreshTokenAndRetry(
+      await refreshTokenAndRetry(() =>
         updateSectionWithImage(
           sectionId,
           cmsItemId,

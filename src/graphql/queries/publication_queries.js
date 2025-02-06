@@ -23,9 +23,19 @@ export const PublicationPublicQueries = {
                         id
                         section_id
                         entry_title
+                        entry_complement
                     }
                 }
             }
+        }
+    }`,
+
+  getIconsBootstrapList: `
+    {
+        getIconsBootstrap{
+            id
+            icon_class
+            icon_name
         }
     }`,
 };

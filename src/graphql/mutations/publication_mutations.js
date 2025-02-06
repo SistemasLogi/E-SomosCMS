@@ -21,11 +21,33 @@ export const PublicationMutations = {
         }
     `,
 
+  setUpdateItemWithoutImage: (cms_item_id, cms_item_title, text_add) => `
+        mutation {
+          updatePrincipalItemNotImage(input: {
+            cms_item_id: ${cms_item_id}
+            cms_item_title: "${cms_item_title}"
+            text_add: "${text_add}"
+          }) {
+            status
+            status_code
+            status_message
+            cms_item {
+              id
+              cms_item_name
+              cms_item_title
+              url_header_image
+              text_add
+            }
+          }
+        }
+    `,
+
   setUpsertSection: ({
     id = null, // Por defecto es null
     cms_item_id,
     section_title,
     section_type,
+    section_description = null, // Campo opcional
     img_header = null, // Imagen opcional para el header
     img_card = null, // Imagen opcional para el card
   }) => {
@@ -39,6 +61,12 @@ export const PublicationMutations = {
     if (id) {
       input += ` id: ${id}`;
     }
+    // Incluir la descripción si está presente
+    if (section_description) {
+      input += `\n      section_description: "${section_description}"`;
+    }
+
+    // Incluir las imágenes si están presentes
     if (img_header) {
       input += `\n      url_header_image: $img_header`;
     }
@@ -76,6 +104,50 @@ export const PublicationMutations = {
       `;
   },
 
+  setUpsertSectionWithoutImage: ({
+    id = null, // Por defecto es null (creación)
+    cms_item_id,
+    section_title,
+    section_type,
+    section_description = null, // Campo opcional
+  }) => {
+    // Construcción dinámica del input
+    let input = `
+        cms_item_id: ${cms_item_id}
+        section_title: "${section_title}"
+        section_type: "${section_type}"
+      `;
+
+    // Si se proporciona un id, se incluye en el input (actualización)
+    if (id) {
+      input += `\n      id: ${id}`;
+    }
+
+    // Incluir la descripción si está presente
+    if (section_description) {
+      input += `\n      section_description: "${section_description}"`;
+    }
+
+    return `
+        mutation {
+          upsertSection(input: { ${input} }) {
+            status
+            status_code
+            status_message
+            section {
+              id
+              cms_item_id
+              section_title
+              section_description
+              url_header_image
+              url_card_image
+              section_type
+            }
+          }
+        }
+      `;
+  },
+
   setDeleteSection: (section_id) => `
     mutation {
       deleteSection(id: ${section_id}) {
@@ -85,4 +157,39 @@ export const PublicationMutations = {
       }
     }
     `,
+
+  setUpsertEntry: ({
+    id = null,
+    section_id,
+    entry_title,
+    entry_complement,
+  }) => {
+    // Construcción dinámica del input
+    let input = `
+        section_id: ${section_id}
+        entry_title: "${entry_title}"
+        entry_complement: "${entry_complement}"
+      `;
+
+    // Si se proporciona un id, se incluye en el input (actualización)
+    if (id) {
+      input += `\n      id: ${id}`;
+    }
+
+    return `
+        mutation {
+          upsertEntry(input: { ${input} }) {
+            status
+            status_code
+            status_message
+            entry {
+              id
+              section_id
+              entry_title
+              entry_complement
+            }
+          }
+        }
+      `;
+  },
 };

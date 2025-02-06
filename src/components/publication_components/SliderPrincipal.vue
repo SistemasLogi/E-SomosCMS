@@ -348,7 +348,7 @@ const upsertSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos.data.data);
+  console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -356,11 +356,11 @@ const upsertSectionWithImage = async (
         dataMutation.upsertSection;
 
       if (status_code === 200 || status_code === 201) {
+        await getDataSlider(1);
+        closeDialogUpload();
         loadingBtn.value = false;
         idSection.value = null;
         imgEdit.value = null;
-        await getDataSlider(1);
-        closeDialogUpload();
       } else {
         handleError({
           code: status_code,
@@ -369,7 +369,7 @@ const upsertSectionWithImage = async (
       }
     } else {
       if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-        await refreshTokenAndRetry(
+        await refreshTokenAndRetry(() =>
           upsertSectionWithImage(
             sectionId,
             cmsItemId,
@@ -387,7 +387,7 @@ const upsertSectionWithImage = async (
     }
   } catch (error) {
     if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-      await refreshTokenAndRetry(
+      await refreshTokenAndRetry(() =>
         upsertSectionWithImage(
           sectionId,
           cmsItemId,
@@ -425,11 +425,11 @@ const deleteSection = async (sectionId) => {
       const { status_code, status_message } = dataMutation.deleteSection;
 
       if (status_code === 200) {
+        await getDataSlider(1);
+        closeDialogConfirm();
         loadingBtn.value = false;
         idSection.value = null;
         imgEdit.value = null;
-        await getDataSlider(1);
-        closeDialogConfirm();
       } else {
         handleError({
           code: status_code,
@@ -438,7 +438,7 @@ const deleteSection = async (sectionId) => {
       }
     } else {
       if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-        await refreshTokenAndRetry(deleteSection(sectionId));
+        await refreshTokenAndRetry(() => deleteSection(sectionId));
       } else {
         handleError({
           code: 500,
@@ -448,7 +448,7 @@ const deleteSection = async (sectionId) => {
     }
   } catch (error) {
     if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
-      await refreshTokenAndRetry(deleteSection(sectionId));
+      await refreshTokenAndRetry(() => deleteSection(sectionId));
     } else {
       handleError({ code: 500, message: "Error inesperado en el servidor" });
     }
@@ -554,6 +554,7 @@ const handleError = (response) => {
 
 const closeDialog = () => {
   visibleError.value = false;
+  loadingBtn.value = false;
 };
 
 const closeDialogUpload = () => {

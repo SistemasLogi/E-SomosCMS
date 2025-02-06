@@ -47,7 +47,10 @@
         <v-alert type="info" variant="tonal">
           <p style="color: black">
             En esta sección podrás editar los enlaces de interés, agregar nuevos
-            y configurar las redes sociales o enlaces de contacto de cada uno.
+            y configurar las redes sociales o enlaces de contacto de cada uno,
+            pulsando en los iconos de redes sociales puedes editarlos o
+            eliminarlos, para crear un nuevo enlace en una tarjeta, simplemente
+            haz clic en el botón de "Add link" en la tarjeta correspondiente.
           </p>
         </v-alert>
       </v-col>
@@ -81,7 +84,14 @@
                 variant="text"
                 color="primary"
                 v-tooltip:top="'Editar imagen o titulo'"
-                @click="openDialogEditTarget"
+                @click="
+                  openDialogEditTarget(
+                    link.idSection,
+                    link.name,
+                    link.image,
+                    'Editar imagen o título'
+                  )
+                "
               ></v-btn>
               <v-btn
                 icon="mdi-trash-can"
@@ -99,24 +109,23 @@
             ></v-img>
             <v-card-title>{{ link.name }}</v-card-title>
             <v-card-subtitle class="d-flex justify-center align-center">
-              <v-img
+              <v-avatar
                 v-for="social in link.socials"
-                :key="social.icon"
-                :src="social.icon"
-                height="30"
-                width="30"
-                contain
-                class="mx-1"
-              ></v-img>
+                :image="social.icon"
+                size="40"
+                style="cursor: pointer"
+                @click="openDialogLinkSocial(social)"
+              ></v-avatar>
             </v-card-subtitle>
             <v-card-actions>
               <v-btn
+                append-icon="mdi-plus"
                 class="text-none"
                 color="primary"
                 rounded="lg"
-                text="Editar link's"
+                text="Add Link"
                 variant="flat"
-                @click=""
+                @click="openDialogLinks(link)"
               ></v-btn>
             </v-card-actions>
           </v-card>
@@ -126,7 +135,9 @@
           <v-card
             rounded="lg"
             class="add-card d-flex flex-column align-center text-center pa-4"
-            @click=""
+            @click="
+              openDialogEditTarget(null, null, null, 'Agregar nueva tarjeta')
+            "
           >
             <v-btn
               icon="mdi-plus"
@@ -202,7 +213,7 @@
           text="Guardar"
           variant="flat"
           :loading="loadingBtnTitle"
-          @click=""
+          @click="saveDataItem"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -276,7 +287,87 @@
           text="Guardar"
           variant="flat"
           :loading="loadingBtnEditTarget"
-          @click=""
+          @click="validateDataForm"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Editar Enlaces de redes sociales -->
+  <v-dialog v-model="visibleDialogLinks" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        {{ titleDialogLinks }}
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogLinks"
+        ></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-col cols="12" v-if="linksExist">
+        <v-card>
+          <v-card-title class="text-h6"> Enlace Actual </v-card-title>
+          <v-card-subtitle class="d-flex justify-center align-center">
+            <!-- Mostrar enlace de redes sociales -->
+            <v-avatar :image="linkTargetSelected.icon" size="60"></v-avatar>
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+
+      <v-card-text>
+        <v-form ref="formLinks">
+          <v-col cols="12">
+            <v-select
+              v-model="selectedIcon"
+              color="primary"
+              base-color="primary"
+              density="comfortable"
+              variant="solo-filled"
+              label="Tipos de Enlaces"
+              :items="itemsIcons"
+              item-title="title"
+              item-value="value"
+              clearable
+              :rules="[rules.required]"
+            >
+            </v-select>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="setUrlLink"
+              label="Url del Enlace"
+              color="primary"
+              base-color="primary"
+              density="comfortable"
+              variant="solo-filled"
+              clearable
+              :rules="[rules.required, rules.urlRule]"
+            ></v-text-field>
+          </v-col>
+        </v-form>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogLinks"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Guardar"
+          variant="flat"
+          :loading="loadingBtnEditLinks"
+          @click="validateDataFormLinks(false)"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -300,23 +391,79 @@ const router = useRouter();
 
 const visibleDialogTitle = ref(false);
 const visibleDialogTarget = ref(false);
+const visibleDialogLinks = ref(false);
+const titleDialogLinks = ref("");
 const titleDialogTarget = ref("");
 const setTitle = ref("");
 const setDescription = ref("");
 const setTitleTarget = ref("");
+const setUrlLink = ref("");
+const selectedIcon = ref(null);
 const loadingBtnTitle = ref(false);
 const loadingBtnEditTarget = ref(false);
 const loadingData = ref(false);
+const loadingBtnEditLinks = ref(false);
 const errorMessage = ref("");
 const imgEdit = ref(null);
 const codeError = ref("");
 const visibleError = ref(false);
 const textDialog = ref("");
+const uploadedFile = ref(null);
+const linksSelected = ref([]);
+const linksExist = ref(false);
+const linkTargetSelected = ref({});
+const itemsIcons = ref([]);
+const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const dataSection = ref({
   title: "",
   description: "",
 });
 const links = ref([]);
+const idSectionEdit = ref(null); // Variable para almacenar el ID de la sección a editar
+const formLinks = ref(null);
+const rules = ref({
+  required: (value) => !!value || "Requerido.",
+  min: (v) => v.length >= 8 || "Minimo 8 caracteres",
+  numberRule: (value) => /^\d+$/.test(value) || "Solo se permiten números",
+  emailRule: (value) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(value) || "Correo electrónico inválido";
+  },
+  maxLengthRule: (max) => (value) =>
+    !value || value.length <= max || `Máximo ${max} caracteres`,
+  // Regla para URLs válidas
+  urlRule: (value) => {
+    const urlPattern =
+      /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    return urlPattern.test(value) || "URL inválida";
+  },
+});
+
+const getDataIcons = async () => {
+  const initialQuery = PublicationPublicQueries.getIconsBootstrapList;
+  try {
+    const response = await axios.post(graphqlServerUrl, {
+      query: initialQuery,
+    });
+
+    const { data } = response;
+
+    if (data && data.data && data.data.getIconsBootstrap) {
+      // Transformar la respuesta para el select
+      itemsIcons.value = data.data.getIconsBootstrap.map((icon) => ({
+        title: icon.icon_name, // Texto visible
+        value: icon.icon_name, // Valor interno
+      }));
+    } else {
+      handleError({
+        code: "500",
+        message: "Error al obtener los iconos",
+      });
+    }
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};
 
 const getDataInterestLinks = async (id) => {
   loadingData.value = true;
@@ -336,20 +483,28 @@ const getDataInterestLinks = async (id) => {
         dataSection.value.description = cms_items[0].text_add;
         console.log(cms_items);
 
+        const itemCms = cms_items[0];
         const sections = cms_items[0].sections || [];
 
         // Transformar los datos de sections en el formato de links
         links.value = sections.map((section) => ({
+          idCms: itemCms.id,
+          idSection: section.id,
           name: section.section_title,
           image:
             `${graphqlImagesUrl}/${section.url_header_image}` ||
             "default-image.jpg", // Imagen por defecto si es null
           socials: section.entryes.map((entry) => ({
             icon: mapSocialIcon(entry.entry_title), // Convertir el título en icono
+            entryId: entry.id,
+            entryTitle: entry.entry_title,
+            entryUrl: entry.entry_complement,
+            sectionId: section.id,
+            sectionName: section.section_title,
           })),
         }));
         loadingData.value = false;
- 
+
         console.log(links.value); // Verifica que los datos se actualizan correctamente
       } else {
         handleError({
@@ -369,6 +524,323 @@ const mapSocialIcon = (entryTitle) => {
   return `${graphqlImagesUrl}img-social/${entryTitle}.png`;
 };
 
+// Actualizar la sección de cabecera
+const updateItemPage = async (itemId, itemTitle, textAdd) => {
+  loadingBtnTitle.value = true;
+  const updateMutation = PublicationMutations.setUpdateItemWithoutImage(
+    itemId,
+    itemTitle,
+    textAdd
+  );
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, cms_item } =
+        dataMutation.updatePrincipalItemNotImage;
+
+      if (status_code === 200) {
+        await getDataInterestLinks(8);
+        loadingBtnTitle.value = false;
+        closeDialogTitle();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          updateItemPage(itemId, itemTitle, textAdd)
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        updateItemPage(itemId, itemTitle, textAdd)
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const saveDataItem = async () => {
+  await updateItemPage(8, setTitle.value, setDescription.value);
+};
+
+// Actualizar o crear una sección con imagen
+const upsertSectionWithImage = async (
+  sectionId,
+  cmsItemId,
+  sectionTitle,
+  sectionType,
+  fileImgHeader
+) => {
+  loadingBtnEditTarget.value = true;
+  const initialMutation = PublicationMutations.setUpsertSection({
+    id: sectionId,
+    cms_item_id: cmsItemId,
+    section_title: sectionTitle,
+    section_type: sectionType,
+    img_header: true,
+  });
+
+  console.log("Query generado:", initialMutation);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "multipart/form-data",
+  };
+
+  const formData = new FormData();
+  formData.append(
+    "operations",
+    JSON.stringify({
+      query: initialMutation,
+      variables: {
+        img_header: null,
+      },
+    })
+  );
+  formData.append("map", JSON.stringify({ 1: ["variables.img_header"] }));
+  formData.append("1", fileImgHeader);
+
+  const datos = await axios.post(graphqlServerUrl, formData, { headers });
+  console.log(datos.data.data);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, section } =
+        dataMutation.upsertSection;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataInterestLinks(8);
+        closeDialogTarget();
+        loadingBtnEditTarget.value = false;
+        imgEdit.value = null;
+        idSectionEdit.value = null;
+        setTitleTarget.value = "";
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertSectionWithImage(
+            sectionId,
+            cmsItemId,
+            sectionTitle,
+            sectionType,
+            fileImgHeader
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertSectionWithImage(
+          sectionId,
+          cmsItemId,
+          sectionTitle,
+          sectionType,
+          fileImgHeader
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+// Actualizar o crear una sección sin imagen
+const upsertSectionWithOutImage = async (
+  sectionId,
+  cmsItemId,
+  sectionTitle,
+  sectionType
+) => {
+  loadingBtnEditTarget.value = true;
+  const updateMutation = PublicationMutations.setUpsertSectionWithoutImage({
+    id: sectionId,
+    cms_item_id: cmsItemId,
+    section_title: sectionTitle,
+    section_type: sectionType,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, section } =
+        dataMutation.upsertSection;
+
+      if (status_code === 200) {
+        await getDataInterestLinks(8);
+        closeDialogTarget();
+        loadingBtnEditTarget.value = false;
+        idSectionEdit.value = null;
+        setTitleTarget.value = "";
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertSectionWithOutImage(
+            sectionId,
+            cmsItemId,
+            sectionTitle,
+            sectionType
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertSectionWithOutImage(
+          sectionId,
+          cmsItemId,
+          sectionTitle,
+          sectionType
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+// Actualizar o crear una sección sin imagen
+const upsertEntry = async (entryId, sectionId, entryTitle, entryComplement) => {
+  loadingBtnEditLinks.value = true;
+  const updateMutation = PublicationMutations.setUpsertEntry({
+    id: entryId,
+    section_id: sectionId,
+    entry_title: entryTitle,
+    entry_complement: entryComplement,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, entry } = dataMutation.upsertEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataInterestLinks(8);
+        closeDialogLinks();
+        setUrlLink.value = "";
+        selectedIcon.value = null;
+        linkTargetSelected.value = {};
+        loadingBtnEditLinks.value = false;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntry(entryId, sectionId, entryTitle, entryComplement)
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar o crear el enlace",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntry(entryId, sectionId, entryTitle, entryComplement)
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const refreshTokenAndRetry = async (callback) => {
+  const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
+  const responseRefresh = await getTokenRefreshKeyCollaborator(encriptedKey);
+
+  if (responseRefresh.code === 200) {
+    //console.log(responseRefresh.message);
+    await callback();
+  } else {
+    handleError({
+      code: responseRefresh.code,
+      message: responseRefresh.message,
+    });
+  }
+};
+
 // Función que maneja el cambio de archivo
 const onFileChange = (event) => {
   // Acceder a los archivos seleccionados desde el evento
@@ -385,6 +857,65 @@ const onFileChange = (event) => {
   //console.log("Archivo asignado:", uploadedFile.value);
 };
 
+const validateDataForm = async () => {
+  // Validar que se ha cargado un archivo
+  if (!uploadedFile.value) {
+    upsertSectionWithOutImage(
+      idSectionEdit.value,
+      8,
+      setTitleTarget.value,
+      "card"
+    );
+    return;
+  }
+
+  // Validar que el archivo sea una instancia de File
+  if (!(uploadedFile.value instanceof File)) {
+    errorMessage.value = "El archivo seleccionado no es válido."; // Mensaje de error si no es un archivo válido
+    return;
+  }
+
+  // Validar el formato del archivo (tipo MIME)
+  if (!allowedFormats.includes(uploadedFile.value.type)) {
+    errorMessage.value = "Formato de imagen no válido. Use JPG, PNG o BMP."; // Mensaje de error si el formato no es válido
+    return;
+  }
+
+  // Si pasa todas las validaciones, entonces se puede continuar
+  //console.log("Archivo válido:", uploadedFile.value);
+
+  upsertSectionWithImage(
+    idSectionEdit.value,
+    8,
+    setTitleTarget.value,
+    "card",
+    uploadedFile.value
+  );
+};
+
+const validateDataFormLinks = async () => {
+  const { valid } = await formLinks.value.validate();
+  if (valid) {
+    console.log("Formulario válido");
+
+    if (linksExist.value) {
+      console.log("edit");
+      const entryId = linkTargetSelected.value.entryId;
+      const sectionId = linkTargetSelected.value.sectionId;
+      const entryTitle = selectedIcon.value;
+      const entryComplement = setUrlLink.value;
+      await upsertEntry(entryId, sectionId, entryTitle, entryComplement);
+    } else {
+      console.log("new");
+      const entryId = null;
+      const sectionId = linkTargetSelected.value.idSection;
+      const entryTitle = selectedIcon.value;
+      const entryComplement = setUrlLink.value;
+      await upsertEntry(entryId, sectionId, entryTitle, entryComplement);
+    }
+  }
+};
+
 const handleError = (response) => {
   codeError.value = `Error: ${response.code}`;
   textDialog.value = response.message;
@@ -393,18 +924,61 @@ const handleError = (response) => {
 
 const openDialogEditSection = () => {
   visibleDialogTitle.value = true;
+  setTitle.value = dataSection.value.title;
+  setDescription.value = dataSection.value.description;
 };
 
 const closeDialogTitle = () => {
   visibleDialogTitle.value = false;
 };
 
-const openDialogEditTarget = () => {
+const openDialogEditTarget = (idSection, name, image, title) => {
   visibleDialogTarget.value = true;
+  setTitleTarget.value = name;
+  imgEdit.value = image;
+  titleDialogTarget.value = title;
+  idSectionEdit.value = idSection;
 };
 
 const closeDialogTarget = () => {
   visibleDialogTarget.value = false;
+  uploadedFile.value = null;
+  errorMessage.value = "";
+};
+
+const openDialogLinks = (link) => {
+  linksExist.value = false;
+  linkTargetSelected.value = {};
+  visibleDialogLinks.value = true;
+  //linksSelected.value = link;
+  titleDialogLinks.value = "Agregar link en " + link.name;
+  linkTargetSelected.value = link;
+  console.log(link);
+};
+
+const openDialogLinkSocial = (social) => {
+  linksExist.value = true;
+  linkTargetSelected.value = {};
+  visibleDialogLinks.value = true;
+  //linksSelected.value = link;
+  titleDialogLinks.value =
+    "Editar link de " + social.entryTitle + " en " + social.sectionName;
+  linkTargetSelected.value = social;
+  setUrlLink.value = social.entryUrl;
+  // Asignar el valor al select (entryTitle coincide con icon_name)
+  selectedIcon.value = social.entryTitle;
+  console.log(social);
+};
+
+const closeDialogLinks = () => {
+  visibleDialogLinks.value = false;
+  setUrlLink.value = "";
+  selectedIcon.value = null;
+};
+
+const editEntry = (social) => {
+  console.log(social);
+  setUrlLink.value = social.entryUrl;
 };
 
 onMounted(async () => {
@@ -414,6 +988,7 @@ onMounted(async () => {
   if (tokenExists) {
     //console.log("EXISTE");
     await getDataInterestLinks(8);
+    await getDataIcons();
   } else {
     router.push("/");
   }
@@ -421,6 +996,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.error-message {
+  display: block;
+  font-size: 0.875rem;
+  color: #e01304;
+  margin-top: 4px;
+  padding-left: 16px; /* Le da un pequeño margen izquierdo */
+}
+
 .circular-image {
   width: 150px; /* Asegura que el ancho y la altura sean iguales */
   height: 150px;

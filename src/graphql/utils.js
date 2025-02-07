@@ -90,6 +90,7 @@ export const menuItems = [
         title: "Pagina de Nosotros",
         icon: "mdi-information-variant",
         permission: 5,
+        route: { name: "AboutUs" },
       },
       {
         title: "Pagina de Rutas",

@@ -35,6 +35,12 @@ export default [
           component: () =>
             import("@/components/publication_components/InterestLinks.vue"),          
         },
+        {
+          path: "pagina-nosotros",
+          name: "AboutUs",
+          component: () =>
+            import("@/components/publication_components/About.vue"),          
+        },
       ]
     },
   ];

@@ -192,4 +192,14 @@ export const PublicationMutations = {
         }
       `;
   },
+
+  setDeleteEntry: (entry_id) => `
+  mutation {
+    deleteEntry(id: ${entry_id}) {
+      status
+      status_code
+      status_message
+    }
+  }
+  `,
 };

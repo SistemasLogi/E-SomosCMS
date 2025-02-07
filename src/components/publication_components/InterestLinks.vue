@@ -98,7 +98,7 @@
                 color="error"
                 variant="text"
                 v-tooltip:top="'Eliminar tarjeta'"
-                @click=""
+                @click="openDialogDeleteTarget(link.idSection, link.name)"
               ></v-btn>
             </v-card-actions>
             <v-img
@@ -348,6 +348,20 @@
             ></v-text-field>
           </v-col>
         </v-form>
+        <v-col
+          cols="12"
+          class="d-flex justify-center align-center"
+          v-if="linksExist"
+        >
+          <v-btn
+            class="text-none"
+            rounded="lg"
+            text="Eliminar Enlace"
+            variant="flat"
+            color="danger"
+            @click="openDialogConfirmDeleteLink"
+          ></v-btn>
+        </v-col>
       </v-card-text>
 
       <v-divider class="mt-2"></v-divider>
@@ -372,11 +386,90 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="visibleDialogConfirmLink" max-width="600px" persistent>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Confirmar...
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogConfirmLink"
+        ></v-btn>
+      </v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert :title="titleConfirmDeleteLink" type="warning" variant="tonal"
+          ><p style="color: black">
+            {{ textDialogConfirmDeleteLink }}
+          </p></v-alert
+        >
+      </v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          text
+          @click="closeDialogConfirmLink"
+          >No
+        </v-btn>
+        <v-btn
+          color="primary"
+          text="Si"
+          variant="tonal"
+          :loading="loadingBtnDeleteLink"
+          @click="executeDeleteEntryLink"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="visibleDialogConfirmTarget" max-width="600px" persistent>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Confirmar...
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogConfirmTarget"
+        ></v-btn>
+      </v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert
+          :title="titleConfirmDeleteTarget"
+          type="warning"
+          variant="tonal"
+          ><p style="color: black">
+            {{ textDialogConfirmDeleteTarget }}
+          </p></v-alert
+        >
+      </v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          text
+          @click="closeDialogConfirmTarget"
+          >No
+        </v-btn>
+        <v-btn
+          color="primary"
+          text="Si"
+          variant="tonal"
+          :loading="loadingBtnDeleteTarget"
+          @click="executeDeleteTarget"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
 import axios from "axios";
-import { shallowRef, ref, onMounted, onUnmounted } from "vue";
+import { shallowRef, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
 import {
@@ -392,6 +485,8 @@ const router = useRouter();
 const visibleDialogTitle = ref(false);
 const visibleDialogTarget = ref(false);
 const visibleDialogLinks = ref(false);
+const visibleDialogConfirmLink = ref(false);
+const visibleDialogConfirmTarget = ref(false);
 const titleDialogLinks = ref("");
 const titleDialogTarget = ref("");
 const setTitle = ref("");
@@ -403,16 +498,21 @@ const loadingBtnTitle = ref(false);
 const loadingBtnEditTarget = ref(false);
 const loadingData = ref(false);
 const loadingBtnEditLinks = ref(false);
+const loadingBtnDeleteLink = ref(false);
+const loadingBtnDeleteTarget = ref(false);
 const errorMessage = ref("");
 const imgEdit = ref(null);
 const codeError = ref("");
 const visibleError = ref(false);
 const textDialog = ref("");
 const uploadedFile = ref(null);
-const linksSelected = ref([]);
 const linksExist = ref(false);
 const linkTargetSelected = ref({});
 const itemsIcons = ref([]);
+const titleConfirmDeleteLink = ref("");
+const textDialogConfirmDeleteLink = ref("");
+const titleConfirmDeleteTarget = ref("");
+const textDialogConfirmDeleteTarget = ref("");
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const dataSection = ref({
   title: "",
@@ -420,6 +520,7 @@ const dataSection = ref({
 });
 const links = ref([]);
 const idSectionEdit = ref(null); // Variable para almacenar el ID de la sección a editar
+const idSectionDelete = ref(null); // Variable para almacenar el ID de la sección a eliminar
 const formLinks = ref(null);
 const rules = ref({
   required: (value) => !!value || "Requerido.",
@@ -826,6 +927,122 @@ const upsertEntry = async (entryId, sectionId, entryTitle, entryComplement) => {
   }
 };
 
+const deleteEntryData = async (entryId) => {
+  loadingBtnDeleteLink.value = true;
+  const deleteMutation = PublicationMutations.setDeleteEntry(entryId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteEntry;
+
+      if (status_code === 200) {
+        await getDataInterestLinks(8);
+        closeDialogConfirmLink();
+        closeDialogLinks();
+        setUrlLink.value = "";
+        selectedIcon.value = null;
+        linkTargetSelected.value = {};
+        loadingBtnDeleteLink.value = false;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteEntryData(entryId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteEntryData(entryId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const executeDeleteEntryLink = async () => {
+  await deleteEntryData(linkTargetSelected.value.entryId);
+};
+
+const deleteSection = async (sectionId) => {
+  loadingBtnDeleteTarget.value = true;
+  const deleteMutation = PublicationMutations.setDeleteSection(sectionId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteSection;
+
+      if (status_code === 200) {
+        await getDataInterestLinks(8);
+        closeDialogConfirmTarget();
+        loadingBtnDeleteTarget.value = false;
+        idSectionDelete.value = null;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteSection(sectionId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteSection(sectionId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const executeDeleteTarget = async () => {
+  await deleteSection(idSectionDelete.value);
+}
+
 const refreshTokenAndRetry = async (callback) => {
   const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
   const responseRefresh = await getTokenRefreshKeyCollaborator(encriptedKey);
@@ -970,10 +1187,38 @@ const openDialogLinkSocial = (social) => {
   console.log(social);
 };
 
+const openDialogConfirmDeleteLink = () => {
+  titleConfirmDeleteLink.value =
+    "Eliminar enlace " + linkTargetSelected.value.entryTitle;
+  textDialogConfirmDeleteLink.value =
+    "¿Estás seguro de eliminar el enlace de " +
+    linkTargetSelected.value.entryTitle +
+    " en " +
+    linkTargetSelected.value.sectionName +
+    "?";
+  visibleDialogConfirmLink.value = true;
+};
+
+const openDialogDeleteTarget = (idSection, name) => {
+  visibleDialogConfirmTarget.value = true;
+  titleConfirmDeleteTarget.value = "Eliminar tarjeta " + name;
+  textDialogConfirmDeleteTarget.value =
+    "¿Estás seguro de eliminar la tarjeta " + name + "?";
+  idSectionDelete.value = idSection;
+};
+
 const closeDialogLinks = () => {
   visibleDialogLinks.value = false;
   setUrlLink.value = "";
   selectedIcon.value = null;
+};
+
+const closeDialogConfirmLink = () => {
+  visibleDialogConfirmLink.value = false;
+};
+
+const closeDialogConfirmTarget = () => {
+  visibleDialogConfirmTarget.value = false;
 };
 
 const editEntry = (social) => {

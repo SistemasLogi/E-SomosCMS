@@ -30,6 +30,43 @@ export const PublicationPublicQueries = {
         }
     }`,
 
+  getSectionList: (section_id) => `
+    {
+        sectionList ${section_id ? `(id: ${section_id})` : ""} {
+            status
+            status_code
+            status_message
+            sections{
+                id
+                cms_item_id
+                section_title
+                section_description
+                url_header_image
+                url_card_image
+                section_type
+                entryes{
+                    id
+                    section_id
+                    entry_title
+                    contentEntries{
+                        id
+                        entry_id
+                        content
+                        content_type
+                        element_order
+                    }
+                    fileEntries{
+                        id
+                        entry_id
+                        url_file
+                        file_type
+                        element_order
+                    }
+                }
+            }
+        }
+    }`,
+
   getIconsBootstrapList: `
     {
         getIconsBootstrap{

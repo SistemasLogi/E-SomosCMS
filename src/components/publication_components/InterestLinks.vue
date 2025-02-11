@@ -46,11 +46,11 @@
       <v-col cols="12">
         <v-alert type="info" variant="tonal">
           <p style="color: black">
-            En esta sección podrás editar los enlaces de interés, agregar nuevos
-            y configurar las redes sociales o enlaces de contacto de cada uno,
-            pulsando en los iconos de redes sociales puedes editarlos o
-            eliminarlos, para crear un nuevo enlace en una tarjeta, simplemente
-            haz clic en el botón de "Add link" en la tarjeta correspondiente.
+            En esta sección, podrás editar los enlaces de interés, agregar
+            nuevos y configurar las redes sociales o enlaces de contacto de cada
+            uno. Pulsando en los iconos de redes sociales, puedes editarlos o
+            eliminarlos. Para crear un nuevo enlace en una tarjeta, simplemente
+            haz clic en el botón de 'Add link' en la tarjeta correspondiente.
           </p>
         </v-alert>
       </v-col>
@@ -179,6 +179,7 @@
                 density="comfortable"
                 variant="solo-filled"
                 clearable
+                :rules="[rules.maxLengthRule(45)]"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
@@ -190,6 +191,7 @@
                 variant="solo-filled"
                 rows="3"
                 clearable
+                :rules="[rules.maxLengthRule(200)]"
               ></v-textarea>
             </v-col>
           </v-form>
@@ -213,7 +215,7 @@
           text="Guardar"
           variant="flat"
           :loading="loadingBtnTitle"
-          @click="saveDataItem"
+          @click="validateDataFormTitle"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -245,29 +247,32 @@
       </v-col>
 
       <v-card-text>
-        <v-col cols="12">
-          <v-file-upload
-            title="Arrastra o selecciona una imagen"
-            :density="density"
-            accept="image/png, image/jpeg, image/bmp"
-            @change="onFileChange"
-          ></v-file-upload>
-          <!-- Mostrar el mensaje de error debajo del componente de carga de archivos -->
-          <span v-if="errorMessage" class="error-message">
-            {{ errorMessage }}
-          </span>
-        </v-col>
-        <v-col cols="12">
-          <v-text-field
-            v-model="setTitleTarget"
-            label="Título de la Tarjeta"
-            color="primary"
-            base-color="primary"
-            density="comfortable"
-            variant="solo-filled"
-            clearable
-          ></v-text-field>
-        </v-col>
+        <v-form ref="formTarget">
+          <v-col cols="12">
+            <v-file-upload
+              title="Arrastra o selecciona una imagen"
+              :density="density"
+              accept="image/png, image/jpeg, image/bmp"
+              @change="onFileChange"
+            ></v-file-upload>
+            <!-- Mostrar el mensaje de error debajo del componente de carga de archivos -->
+            <span v-if="errorMessage" class="error-message">
+              {{ errorMessage }}
+            </span>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="setTitleTarget"
+              label="Título de la Tarjeta"
+              color="primary"
+              base-color="primary"
+              density="comfortable"
+              variant="solo-filled"
+              clearable
+              :rules="[rules.maxLengthRule(25)]"
+            ></v-text-field>
+          </v-col>
+        </v-form>
       </v-card-text>
 
       <v-divider class="mt-2"></v-divider>
@@ -344,7 +349,7 @@
               density="comfortable"
               variant="solo-filled"
               clearable
-              :rules="[rules.required, rules.urlRule]"
+              :rules="[rules.required, rules.urlRule, rules.maxLengthRule(150)]"
             ></v-text-field>
           </v-col>
         </v-form>
@@ -386,6 +391,8 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- Dialogo de Confirmar Eliminar Enlace de redes sociales -->
   <v-dialog v-model="visibleDialogConfirmLink" max-width="600px" persistent>
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
@@ -424,6 +431,8 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- Dialogo de Confirmar Eliminar Enlace de redes sociales -->
   <v-dialog v-model="visibleDialogConfirmTarget" max-width="600px" persistent>
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
@@ -462,6 +471,29 @@
           :loading="loadingBtnDeleteTarget"
           @click="executeDeleteTarget"
         ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Error -->
+  <v-dialog v-model="visibleError" max-width="500px">
+    <v-card>
+      <v-card-title class="headline">Error</v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert
+          :text="textDialog"
+          :title="codeError"
+          type="error"
+          variant="tonal"
+        ></v-alert
+      ></v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="primary" text @click="closeDialog"
+          >Cerrar</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -521,7 +553,9 @@ const dataSection = ref({
 const links = ref([]);
 const idSectionEdit = ref(null); // Variable para almacenar el ID de la sección a editar
 const idSectionDelete = ref(null); // Variable para almacenar el ID de la sección a eliminar
+const formRef = ref(null);
 const formLinks = ref(null);
+const formTarget = ref(null);
 const rules = ref({
   required: (value) => !!value || "Requerido.",
   min: (v) => v.length >= 8 || "Minimo 8 caracteres",
@@ -1041,7 +1075,7 @@ const deleteSection = async (sectionId) => {
 
 const executeDeleteTarget = async () => {
   await deleteSection(idSectionDelete.value);
-}
+};
 
 const refreshTokenAndRetry = async (callback) => {
   const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
@@ -1076,6 +1110,12 @@ const onFileChange = (event) => {
 
 const validateDataForm = async () => {
   // Validar que se ha cargado un archivo
+  const { valid } = await formTarget.value.validate();
+
+  if (!valid) {
+    return;
+  }
+
   if (!uploadedFile.value) {
     upsertSectionWithOutImage(
       idSectionEdit.value,
@@ -1108,6 +1148,13 @@ const validateDataForm = async () => {
     "card",
     uploadedFile.value
   );
+};
+
+const validateDataFormTitle = async () => {
+  const { valid } = await formRef.value.validate();
+  if (valid) {
+    await saveDataItem();
+  }
 };
 
 const validateDataFormLinks = async () => {
@@ -1145,8 +1192,18 @@ const openDialogEditSection = () => {
   setDescription.value = dataSection.value.description;
 };
 
+const closeDialog = () => {
+  closeDialogTitle();
+  closeDialogTarget();
+  closeDialogLinks();
+  closeDialogConfirmLink();
+  closeDialogConfirmTarget();
+  visibleError.value = false;
+};
+
 const closeDialogTitle = () => {
   visibleDialogTitle.value = false;
+  loadingBtnTitle.value = false;
 };
 
 const openDialogEditTarget = (idSection, name, image, title) => {
@@ -1161,6 +1218,7 @@ const closeDialogTarget = () => {
   visibleDialogTarget.value = false;
   uploadedFile.value = null;
   errorMessage.value = "";
+  loadingBtnEditTarget.value = false;
 };
 
 const openDialogLinks = (link) => {
@@ -1211,14 +1269,17 @@ const closeDialogLinks = () => {
   visibleDialogLinks.value = false;
   setUrlLink.value = "";
   selectedIcon.value = null;
+  loadingBtnEditLinks.value = false;
 };
 
 const closeDialogConfirmLink = () => {
   visibleDialogConfirmLink.value = false;
+  loadingBtnDeleteLink.value = false;
 };
 
 const closeDialogConfirmTarget = () => {
   visibleDialogConfirmTarget.value = false;
+  loadingBtnDeleteTarget.value = false;
 };
 
 const editEntry = (social) => {

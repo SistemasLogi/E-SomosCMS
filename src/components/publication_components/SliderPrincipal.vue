@@ -554,19 +554,22 @@ const handleError = (response) => {
 
 const closeDialog = () => {
   visibleError.value = false;
-  loadingBtn.value = false;
+  closeDialogUpload();
+  closeDialogConfirm();
 };
 
 const closeDialogUpload = () => {
   visibleDialogUpload.value = false;
   errorMessage.value = "";
   uploadedFile.value = null;
+  loadingBtn.value = false;
 };
 
 const closeDialogConfirm = () => {
   visibleDialogConfirm.value = false;
   idSection.value = null;
   imgEdit.value = null;
+  loadingBtn.value = false;
 };
 
 onMounted(async () => {

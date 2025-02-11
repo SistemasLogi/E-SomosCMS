@@ -546,18 +546,22 @@ const handleError = (response) => {
 
 const closeDialog = () => {
   visibleError.value = false;
+  closeDialogDark();
+  closeDialogLight();
 };
 
 const closeDialogDark = () => {
   visibleDialogDark.value = false;
   errorMessage.value = "";
   uploadedFile.value = null;
+  loadingBtn.value = false;
 };
 
 const closeDialogLight = () => {
   visibleDialogLight.value = false;
   errorMessage.value = "";
   uploadedFile.value = null;
+  loadingBtn.value = false;
 };
 
 // Función para detectar el tamaño de la pantalla

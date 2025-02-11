@@ -42,6 +42,23 @@ export const PublicationMutations = {
         }
     `,
 
+  setDeleteImageHeaderItem: (item_id) => `
+    mutation {
+      deletePrincipalItemImage(id: ${item_id}) {
+        status
+        status_code
+        status_message
+        cms_item {
+          id
+          cms_item_name
+          cms_item_title
+          url_header_image
+          text_add
+        }
+      }
+    }
+    `,
+
   setUpsertSection: ({
     id = null, // Por defecto es null
     cms_item_id,

@@ -51,78 +51,84 @@
       </v-col>
     </v-row>
     <v-card class="mt-5 pa-4">
-      <v-row justify="center" class="mt-5 mb-5" v-if="loadingData">
-        <v-col cols="12" lg="3">
-          <v-skeleton-loader
-            class="mx-auto border"
-            type="avatar, heading, text"
-          ></v-skeleton-loader>
-        </v-col>
-      </v-row>
-      <!-- Tarjetas de enlaces -->
-      <v-row justify="center" class="mt-5 mb-5 ml-12 mr-12" v-if="!loadingData">
-        <v-col cols="12" sm="6" lg="3" v-for="section in sectionAbout">
-          <v-card rounded="lg" style="height: 300px">
-            <v-card-text>
-              <v-avatar color="primary" size="50" @click="">
-                <i
-                  :class="section.section_type"
-                  style="font-size: 20px; color: white"
-                ></i>
-              </v-avatar>
-            </v-card-text>
-            <v-card-title
-              ><h3>{{ section.section_title }}</h3></v-card-title
-            >
-            <v-card-text>
-              <p>
-                {{ section.section_description }}
-              </p>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                icon="mdi-pencil"
-                variant="text"
-                color="primary"
-                v-tooltip:top="'Editar sección'"
-                @click="openDialogEditSection(section)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-trash-can"
-                color="error"
-                variant="text"
-                v-tooltip:top="'Eliminar sección'"
-                @click="openDialogConfirmSection(section)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-file-document-edit"
-                color="dark"
-                variant="text"
-                v-tooltip:top="'Configurar entrada'"
-                @click="configureEntry(section)"
-              ></v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
+      <v-container style="max-width: 1320px">
+        <v-row justify="center" class="mt-5 mb-5" v-if="loadingData">
+          <v-col cols="12" lg="4">
+            <v-skeleton-loader
+              class="mx-auto border"
+              type="avatar, heading, text"
+            ></v-skeleton-loader>
+          </v-col>
+        </v-row>
+        <!-- Tarjetas de enlaces -->
+        <v-row
+          justify="center"
+          class="mt-5 mb-5 ml-12 mr-12"
+          v-if="!loadingData"
+        >
+          <v-col cols="12" sm="6" lg="4" v-for="section in sectionAbout">
+            <v-card rounded="lg" style="height: 300px">
+              <v-card-text>
+                <v-avatar color="primary" size="50" @click="">
+                  <i
+                    :class="section.section_type"
+                    style="font-size: 20px; color: white"
+                  ></i>
+                </v-avatar>
+              </v-card-text>
+              <v-card-title
+                ><h3>{{ section.section_title }}</h3></v-card-title
+              >
+              <v-card-text>
+                <p>
+                  {{ section.section_description }}
+                </p>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  icon="mdi-pencil"
+                  variant="text"
+                  color="primary"
+                  v-tooltip:top="'Editar sección'"
+                  @click="openDialogEditSection(section)"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-trash-can"
+                  color="error"
+                  variant="text"
+                  v-tooltip:top="'Eliminar sección'"
+                  @click="openDialogConfirmSection(section)"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-file-document-edit"
+                  color="dark"
+                  variant="text"
+                  v-tooltip:top="'Configurar entrada'"
+                  @click="configureEntry(section)"
+                ></v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
 
-        <v-col cols="12" lg="3">
-          <v-card
-            rounded="lg"
-            class="add-card d-flex flex-column align-center text-center pa-4"
-            @click="openDialogEditSection(null)"
-          >
-            <v-btn
-              icon="mdi-plus"
-              color="primary"
-              fab
-              class="floating-btn animate-pulse"
-            ></v-btn>
-            <v-card-title class="responsive-title mt-3"
-              >Agregar Nueva Sección</v-card-title
+          <v-col cols="12" lg="4">
+            <v-card
+              rounded="lg"
+              class="add-card d-flex flex-column align-center text-center pa-4"
+              @click="openDialogEditSection(null)"
             >
-          </v-card>
-        </v-col>
-      </v-row>
+              <v-btn
+                icon="mdi-plus"
+                color="primary"
+                fab
+                class="floating-btn animate-pulse"
+              ></v-btn>
+              <v-card-title class="responsive-title mt-3"
+                >Agregar Nueva Sección</v-card-title
+              >
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
     </v-card>
   </v-container>
 
@@ -294,19 +300,20 @@
             <v-col cols="12">
               <v-text-field
                 v-model="setTitleSection"
-                label="Título"
+                label="Título sección"
                 color="primary"
                 base-color="primary"
                 density="comfortable"
                 variant="solo-filled"
                 clearable
                 :rules="[rules.maxLengthRule(100)]"
+                hint="El título de la sección es el mismo que la cabecera de la página de entrada."
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-textarea
                 v-model="setDescriptionSection"
-                label="Descripción"
+                label="Descripción sección"
                 color="primary"
                 base-color="primary"
                 variant="solo-filled"
@@ -414,7 +421,10 @@
       </v-card-title>
       <v-divider class="mt-3"></v-divider>
       <v-card-text
-        ><v-alert :title="titleConfirmDeleteSection" type="warning" variant="tonal"
+        ><v-alert
+          :title="titleConfirmDeleteSection"
+          type="warning"
+          variant="tonal"
           ><p style="color: black">
             {{ textDialogConfirmDeleteSection }}
           </p>
@@ -1022,7 +1032,8 @@ const openDialogEditSection = (section) => {
 
 const openDialogConfirmSection = (section) => {
   titleConfirmDeleteSection.value = "Eliminar Sección " + section.section_title;
-  textDialogConfirmDeleteSection.value = "¿Desea eliminar la sección " + section.section_title + "?";
+  textDialogConfirmDeleteSection.value =
+    "¿Desea eliminar la sección " + section.section_title + "?";
   idSectionEdit.value = section.id;
   visibleDialogConfirmSection.value = true;
 };
@@ -1030,7 +1041,7 @@ const openDialogConfirmSection = (section) => {
 const closeDialogConfirmSection = () => {
   loadingBtnDeleteSection.value = false;
   visibleDialogConfirmSection.value = false;
-}
+};
 
 const closeDialogHeader = () => {
   visibleDialogHeader.value = false;

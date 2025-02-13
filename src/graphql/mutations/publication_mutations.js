@@ -175,6 +175,25 @@ export const PublicationMutations = {
     }
     `,
 
+  setDeleteImageSection: (section_id) => `
+    mutation {
+      deleteSectionImageHeader(id: ${section_id}) {
+        status
+        status_code
+        status_message
+        section {
+          id
+          cms_item_id
+          section_title
+          section_description
+          url_header_image
+          url_card_image
+          section_type
+        }
+      }
+    }
+    `,
+
   setUpsertEntry: ({
     id = null,
     section_id,

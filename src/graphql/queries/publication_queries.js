@@ -48,6 +48,7 @@ export const PublicationPublicQueries = {
                     id
                     section_id
                     entry_title
+                    entry_complement
                     contentEntries{
                         id
                         entry_id

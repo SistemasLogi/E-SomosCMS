@@ -238,4 +238,109 @@ export const PublicationMutations = {
     }
   }
   `,
+
+  setUpsertFileEntry: ({
+    id = null,
+    entry_id,
+    url_file = null,
+    file_type = null,
+    element_order = null,
+  }) => {
+    // Construcción del input dinámico
+    let input = `entry_id: ${entry_id}`;
+
+    if (id) {
+      input += `\n      id: ${id}`;
+    }
+    if (file_type) {
+      input += `\n      file_type: "${file_type}"`;
+    }
+    if (element_order !== null) {
+      input += `\n      element_order: ${element_order}`;
+    }
+    if (url_file) {
+      input += `\n      url_file: $file_entry`;
+    }
+
+    // Si url_file está presente, se requiere la variable ($file_entry: Upload), de lo contrario, se omite
+    const variables = url_file ? "($file_entry: Upload)" : "";
+
+    return `
+      mutation${variables} {
+        upsertFileEntry(input: { ${input} }) {
+          status
+          status_code
+          status_message
+          file_entry {
+            id
+            entry_id
+            url_file
+            file_type
+            element_order
+          }
+        }
+      }
+    `;
+  },
+
+  setUpsertContentEntry: ({
+    id = null,
+    entry_id,
+    content = null,
+    content_type = null,
+    element_order = null,
+  }) => {
+    // Construcción dinámica del input
+    let input = `entry_id: ${entry_id}`;
+
+    if (id) {
+      input += `\n      id: ${id}`;
+    }
+    if (content) {
+      input += `\n      content: "${content}"`;
+    }
+    if (content_type) {
+      input += `\n      content_type: "${content_type}"`;
+    }
+    if (element_order !== null) {
+      input += `\n      element_order: ${element_order}`;
+    }
+
+    return `
+      mutation {
+        upsertContentEntry(input: { ${input} }) {
+          status
+          status_code
+          status_message
+          contentEntry {
+            id
+            entry_id
+            content
+            content_type
+            element_order
+          }
+        }
+      }
+    `;
+  },
+
+  setDeleteFileEntry: (file_entry_id) => `
+  mutation {
+    deleteFileEntry(id: ${file_entry_id}) {
+      status
+      status_code
+      status_message
+    }
+  }
+  `,
+
+  setDeleteContentEntry: (content_entry_id) => `
+  mutation {
+    deleteContentEntry(id: ${content_entry_id}) {
+      status
+      status_code
+      status_message
+    }
+  }
+  `,
 };

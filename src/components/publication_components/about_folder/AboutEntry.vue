@@ -41,7 +41,7 @@
     </v-card>
 
     <v-card class="mt-5 pa-4">
-      <v-container style="max-width: 1400px">
+      <v-container style="max-width: 1600px">
         <v-row justify="center" class="mt-5 mb-5" v-if="loadingData">
           <v-col cols="12" lg="3">
             <v-skeleton-loader
@@ -69,15 +69,34 @@
                   :active="selectedIndex === i"
                   @click="selectedIndex = i"
                 >
-                  <v-list-item-title
-                    v-text="item.entry_title"
-                  ></v-list-item-title>
+                  <template v-slot:append>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Editar elemento'"
+                      size="small"
+                      @click="openDialogList(item)"
+                    >
+                      <v-icon color="primary">mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Eliminar elemento'"
+                      size="small"
+                      @click="openDialogDeleteList(item)"
+                    >
+                      <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list-item-title v-text="item.entry_title">
+                  </v-list-item-title>
                 </v-list-item>
                 <v-list-item
                   color="primary"
                   base-color="primary"
                   prepend-icon="mdi-pen-plus"
-                  @click=""
+                  @click="openDialogListNew"
                 >
                   <v-list-item-title
                     ><b>Agregar a la lista</b></v-list-item-title
@@ -92,15 +111,15 @@
               <!-- Renderizar imágenes -->
               <v-col v-if="entry.file_type === 'img'" cols="12">
                 <v-row>
-                  <v-col cols="10">
+                  <v-col cols="9">
                     <v-img class="mx-auto" :src="entry.url_file"></v-img>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="3">
                     <v-btn
                       icon
                       variant="text"
                       v-tooltip:top="'Editar imagen'"
-                      @click="editEntry(entry)"
+                      @click="openDialogEntryImg(entry)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -108,9 +127,27 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar imagen'"
-                      @click="deleteEntry(entry)"
+                      @click="openDialogConfirmDelContent(entry)"
                     >
                       <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir imagen'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar imagen'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -119,17 +156,17 @@
               <!-- Renderizar títulos -->
               <v-col v-else-if="entry.content_type?.startsWith('h')" cols="12">
                 <v-row>
-                  <v-col cols="10">
+                  <v-col cols="9">
                     <component :is="entry.content_type">{{
                       entry.content
                     }}</component>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="3">
                     <v-btn
                       icon
                       variant="text"
                       v-tooltip:top="'Editar título'"
-                      @click="editEntry(entry)"
+                      @click="openDialogEntryContent(entry)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -137,9 +174,27 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar título'"
-                      @click="deleteEntry(entry)"
+                      @click="openDialogConfirmDelContent(entry)"
                     >
                       <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir titulo'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar titulo'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -148,15 +203,15 @@
               <!-- Renderizar párrafos -->
               <v-col v-else-if="entry.content_type === 'p'" cols="12">
                 <v-row>
-                  <v-col cols="10">
+                  <v-col cols="9">
                     <p>{{ entry.content }}</p>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="3">
                     <v-btn
                       icon
                       variant="text"
                       v-tooltip:top="'Editar párrafo'"
-                      @click="editEntry(entry)"
+                      @click="openDialogEntryContent(entry)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -164,33 +219,51 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar párrafo'"
-                      @click="deleteEntry(entry)"
+                      @click="openDialogConfirmDelContent(entry)"
                     >
                       <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir párrafo'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar párrafo'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-col>
 
               <!-- Renderizar videos -->
-              <v-col v-else-if="entry.content_type === 'video'" cols="12">
+              <v-col v-else-if="entry.content_type === 'vi'" cols="12">
                 <v-row>
-                  <v-col cols="10">
+                  <v-col cols="9">
                     <iframe
                       width="100%"
                       height="400"
-                      :src="entry.url"
+                      :src="entry.content"
                       frameborder="0"
                       allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen
                     ></iframe>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="3">
                     <v-btn
                       icon
                       variant="text"
                       v-tooltip:top="'Editar video'"
-                      @click="editEntry(entry)"
+                      @click="openDialogEntryContent(entry)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -198,9 +271,27 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar video'"
-                      @click="deleteEntry(entry)"
+                      @click="openDialogConfirmDelContent(entry)"
                     >
                       <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir video'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar video'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -209,19 +300,19 @@
               <!-- Renderizar PDFs -->
               <v-col v-else-if="entry.file_type === 'pdf'" cols="12">
                 <v-row>
-                  <v-col cols="10">
+                  <v-col cols="9">
                     <iframe
                       :src="entry.url_file"
                       width="100%"
                       height="500px"
                     ></iframe>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="3">
                     <v-btn
                       icon
                       variant="text"
                       v-tooltip:top="'Editar PDF'"
-                      @click="editEntry(entry)"
+                      @click="openDialogEntryPdf(entry)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -229,9 +320,27 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar PDF'"
-                      @click="deleteEntry(entry)"
+                      @click="openDialogConfirmDelContent(entry)"
                     >
                       <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir PDF'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar PDF'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -245,7 +354,7 @@
               block
               class="text-none"
               append-icon="mdi-sticker-plus"
-              @click=""
+              @click="openDialogAddContent"
             >
               Agregar Contenido
             </v-btn>
@@ -256,7 +365,7 @@
   </v-container>
 
   <!-- Dialogo de Error -->
-  <v-dialog v-model="visibleError" max-width="500px">
+  <v-dialog v-model="visibleError" persistent max-width="500px">
     <v-card>
       <v-card-title class="headline">Error</v-card-title>
       <v-divider class="mt-3"></v-divider>
@@ -411,6 +520,445 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- Dialogo de Editar Entradas de Lista -->
+  <v-dialog v-model="visibleDialogList" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        {{ titleDialogList }}
+        <v-btn icon="mdi-close" variant="text" @click="closeDialogList"></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-card-text>
+        <v-form ref="formList">
+          <v-col cols="12">
+            <v-alert class="mb-2" type="info" variant="tonal">
+              <p style="color: black">
+                Puedes crear o modificar una entrada en la lista, el campo tiene
+                un límite de caracteres pero se recomienda no usar textos muy
+                extensos.
+              </p>
+            </v-alert>
+            <v-text-field
+              v-model="setListElementTitle"
+              label="Titulo del elemento de la Lista"
+              color="primary"
+              base-color="primary"
+              density="comfortable"
+              variant="solo-filled"
+              clearable
+              :rules="[rules.required, rules.maxLengthRule(50)]"
+            ></v-text-field>
+          </v-col>
+        </v-form>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogList"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Guardar"
+          variant="flat"
+          :loading="loadingBtnEditList"
+          @click="validateDataFormList"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Confirmar Eliminar imagen elemento de la lista -->
+  <v-dialog v-model="visibleDialogConfirmList" max-width="600px" persistent>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Confirmar...
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogConfirmList"
+        ></v-btn>
+      </v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert
+          title="Eliminar Elemento de la Lista"
+          type="warning"
+          variant="tonal"
+          ><p style="color: black">
+            Desea eliminar el elemento {{ listElementTitle }} de la lista?
+          </p>
+        </v-alert>
+      </v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          text
+          @click="closeDialogConfirmList"
+          >No
+        </v-btn>
+        <v-btn
+          color="primary"
+          text="Si"
+          variant="tonal"
+          :loading="loadingBtnDeleteList"
+          @click="executeDeleteList"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Confirmar Eliminar imagen elemento de la lista -->
+  <v-dialog v-model="visibleDialogConfirmContent" max-width="600px" persistent>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Confirmar...
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogConfirmContent"
+        ></v-btn>
+      </v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert
+          title="Eliminar Elemento en el Contenido"
+          type="warning"
+          variant="tonal"
+          ><p style="color: black">
+            {{ messageContent }}
+          </p>
+        </v-alert>
+      </v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          text
+          @click="closeDialogConfirmContent"
+          >No
+        </v-btn>
+        <v-btn
+          color="primary"
+          text="Si"
+          variant="tonal"
+          :loading="loadingBtnDeleteContent"
+          @click="executeDeleteContent"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Subir Imagen en entry file -->
+  <v-dialog v-model="visibleDialogUploadImg" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        {{ titleDialogUploadImg }}
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogUploadImg"
+        ></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-col cols="12" v-if="imgEditUpload">
+        <v-card>
+          <v-img
+            class="bg-grey-lighten-2"
+            max-height="125"
+            :src="imgEditUpload"
+          ></v-img>
+          <v-card-title class="text-h6"> Imagen Actual </v-card-title>
+        </v-card>
+      </v-col>
+
+      <v-card-text>
+        <v-col cols="12">
+          <v-file-upload
+            title="Arrastra o selecciona una imagen"
+            :density="density"
+            accept="image/png, image/jpeg, image/bmp"
+            @change="onFileChangeEntryImg"
+          ></v-file-upload>
+          <!-- Mostrar el mensaje de error debajo del componente de carga de archivos -->
+          <span v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </span>
+        </v-col>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogUploadImg"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Guardar"
+          variant="flat"
+          :loading="loadingBtnUploadImg"
+          @click="validateDataFormEntryImg"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Subir Archivo pdf en entry file -->
+  <v-dialog v-model="visibleDialogUploadPdf" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        {{ titleDialogUploadPdf }}
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogUploadPdf"
+        ></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-card-text>
+        <v-col cols="12">
+          <v-file-upload
+            title="Arrastra o selecciona un archivo PDF"
+            :density="density"
+            accept="application/pdf"
+            @change="onFileChangeEntryPdf"
+          ></v-file-upload>
+          <!-- Mostrar el mensaje de error debajo del componente de carga de archivos -->
+          <span v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </span>
+        </v-col>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogUploadPdf"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Guardar"
+          variant="flat"
+          :loading="loadingBtnUploadPdf"
+          @click="validateDataFormEntryPdf"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Editar Contenido de Entrada -->
+  <v-dialog v-model="visibleDialogEntryContent" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        {{ titleDialogEntryContent }}
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogEntryContent"
+        ></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-card-text>
+        <v-form ref="formEntryContent">
+          <v-col cols="12" v-if="isParagraph">
+            <v-alert class="mb-2" type="info" variant="tonal">
+              <p style="color: black">
+                Puedes crear o modificar un párrafo para el contenido de la
+                entrada.
+              </p>
+            </v-alert>
+            <v-textarea
+              v-model="setTextEntryContent"
+              :label="labelEntryContent"
+              color="primary"
+              base-color="primary"
+              variant="solo-filled"
+              rows="5"
+              clearable
+              :rules="[rules.required, rules.maxLengthRule(600)]"
+            ></v-textarea>
+          </v-col>
+          <v-col cols="12" v-else>
+            <v-alert class="mb-2" type="info" variant="tonal">
+              <p style="color: black">
+                Puedes crear o modificar un titulo para el contenido de la
+                entrada.
+              </p>
+            </v-alert>
+            <v-text-field
+              v-model="setTextEntryContent"
+              :label="labelEntryContent"
+              color="primary"
+              base-color="primary"
+              density="comfortable"
+              variant="solo-filled"
+              clearable
+              :rules="computedRules"
+            ></v-text-field>
+          </v-col>
+        </v-form>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogEntryContent"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Guardar"
+          variant="flat"
+          :loading="loadingBtnEntryContent"
+          @click="validateDataFormEntryContent"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de seleccionar tipo de contenido -->
+  <v-dialog v-model="visibleDialogTypeContent" max-width="600" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        Seleccione el tipo de contenido
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogTypeContent"
+        ></v-btn>
+      </v-card-title>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <v-card-text>
+        <v-radio-group v-model="radios" color="primary">
+          <template v-slot:label>
+            <div>
+              Selecciona el tipo de <strong>contenido</strong> que quieres
+              publicar
+            </div>
+          </template>
+          <v-radio value="h3">
+            <template v-slot:label>
+              <div>
+                <h3>Titulo</h3>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio value="h4">
+            <template v-slot:label>
+              <div>
+                <h4>Subtitulo</h4>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio value="p">
+            <template v-slot:label>
+              <div>
+                <p>Párrafo</p>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio value="img">
+            <template v-slot:label>
+              <div>Imagen</div>
+            </template>
+          </v-radio>
+          <v-radio value="pdf">
+            <template v-slot:label>
+              <div>Archivo <strong>PDF</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="vi">
+            <template v-slot:label>
+              <div>Video de <strong class="text-danger">YouTube</strong></div>
+            </template>
+          </v-radio>
+        </v-radio-group>
+      </v-card-text>
+
+      <v-divider class="mt-2"></v-divider>
+
+      <v-card-actions class="my-2 d-flex justify-end">
+        <v-btn
+          class="text-none"
+          rounded="lg"
+          text="Cancelar"
+          @click="closeDialogTypeContent"
+        ></v-btn>
+
+        <v-btn
+          class="text-none"
+          color="primary"
+          rounded="lg"
+          text="Continuar"
+          variant="flat"
+          @click="openDialogRequireContent"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Overlay de Progreso -->
+  <v-overlay
+    :model-value="overlay"
+    persistent
+    class="align-center justify-center"
+  >
+    <v-responsive class="align-center text-center fill-height">
+      <v-progress-circular
+        color="primary"
+        :size="120"
+        :width="10"
+        indeterminate
+      ></v-progress-circular>
+      <v-empty-state
+        headline="Actualizando..."
+        title="Espere un momento"
+      ></v-empty-state>
+    </v-responsive>
+  </v-overlay>
 </template>
 <script setup>
 import axios from "axios";
@@ -448,9 +996,51 @@ const errorMessage = ref("");
 const loadingBtnEditHeader = ref(false);
 const loadingBtnDeleteImage = ref(false);
 const uploadedFile = ref(null);
+const uploadedFileEntryImg = ref(null);
 const visibleDialogConfirmHeader = ref(false);
+const visibleDialogList = ref(false);
 const formHeader = ref(null);
+const formList = ref(null);
+const titleDialogList = ref("");
+const setListElementTitle = ref("");
+const loadingBtnEditList = ref(false);
+const listExists = ref(false);
+const listSelected = ref({});
+const listElementTitle = ref("");
+const visibleDialogConfirmList = ref(false);
+const loadingBtnDeleteList = ref(false);
+const overlay = ref(false);
+const responseMove = ref({
+  operation: false,
+  message: "",
+});
+const visibleDialogUploadImg = ref(false);
+const titleDialogUploadImg = ref("");
+const imgEditUpload = ref(null);
+const loadingBtnUploadImg = ref(false);
+const entryFileSelected = ref({});
+const visibleDialogEntryContent = ref(false);
+const titleDialogEntryContent = ref("");
+const setTextEntryContent = ref("");
+const labelEntryContent = ref("");
+const isParagraph = ref(false);
+const validateYouTube = ref(false);
+const loadingBtnEntryContent = ref(false);
+const formEntryContent = ref(null);
+const entryContentSelected = ref({});
+const visibleDialogTypeContent = ref(false);
+const radios = ref("h3");
+const idEntryActive = ref(null);
+const visibleDialogUploadPdf = ref(false);
+const titleDialogUploadPdf = ref("");
+const loadingBtnUploadPdf = ref(false);
+const visibleDialogConfirmContent = ref(false);
+const loadingBtnDeleteContent = ref(false);
+const uploadedFileEntryPdf = ref(null);
+const messageContent = ref("");
+const deleteItemContent = ref({});
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
+const allowedFormatsPdf = ["application/pdf"];
 const rules = ref({
   required: (value) => !!value || "Requerido.",
   min: (v) => v.length >= 8 || "Minimo 8 caracteres",
@@ -466,6 +1056,11 @@ const rules = ref({
     const urlPattern =
       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
     return urlPattern.test(value) || "URL inválida";
+  },
+  youtubeRule: (value) => {
+    const youtubePattern =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)$/;
+    return youtubePattern.test(value) || "URL de YouTube inválida";
   },
 });
 
@@ -619,6 +1214,82 @@ const updateSectionWithImage = async (
   }
 };
 
+// Actualizar o crear una sección sin imagen
+const updateSectionWithOutImage = async (
+  sectionId,
+  cmsItemId,
+  sectionTitle,
+  sectionType
+) => {
+  loadingBtnEditHeader.value = true;
+  const updateMutation = PublicationMutations.setUpsertSectionWithoutImage({
+    id: sectionId,
+    cms_item_id: cmsItemId,
+    section_title: sectionTitle,
+    section_type: sectionType,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, section } =
+        dataMutation.upsertSection;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataAboutSection(section.id);
+        closeDialogHeader();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          updateSectionWithOutImage(
+            sectionId,
+            cmsItemId,
+            sectionTitle,
+            sectionType
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        updateSectionWithOutImage(
+          sectionId,
+          cmsItemId,
+          sectionTitle,
+          sectionType
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
 // Eliminar imagen de el encabezado
 const deleteimageHeader = async (sectionId) => {
   loadingBtnDeleteImage.value = true;
@@ -677,6 +1348,535 @@ const executeDeleteImage = async () => {
   await deleteimageHeader(sectionId.value);
 };
 
+// Actualizar o crear una sección sin imagen
+const upsertEntry = async (entryId, sectionId, entryTitle, entryComplement) => {
+  loadingBtnEditList.value = true;
+  const updateMutation = PublicationMutations.setUpsertEntry({
+    id: entryId,
+    section_id: sectionId,
+    entry_title: entryTitle,
+    entry_complement: entryComplement,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, entry } = dataMutation.upsertEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataAboutSection(entry.section_id);
+        closeDialogList();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntry(entryId, sectionId, entryTitle, entryComplement)
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar o crear el enlace",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntry(entryId, sectionId, entryTitle, entryComplement)
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const deleteEntryData = async (entryId) => {
+  loadingBtnDeleteList.value = true;
+  const deleteMutation = PublicationMutations.setDeleteEntry(entryId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteEntry;
+
+      if (status_code === 200) {
+        await getDataAboutSection(sectionId.value);
+        closeDialogConfirmList();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteEntryData(entryId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteEntryData(entryId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const executeDeleteList = async () => {
+  await deleteEntryData(listSelected.value.id);
+};
+
+const updateEntryFile = async (entryFileId, entryId, elementOrder) => {
+  const deleteMutation = PublicationMutations.setUpsertFileEntry({
+    id: entryFileId,
+    entry_id: entryId,
+    element_order: elementOrder,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, file_entry } =
+        dataMutation.upsertFileEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        responseMove.value.operation = true;
+        responseMove.value.message = status_message;
+      } else {
+        responseMove.value.operation = false;
+        responseMove.value.message = status_message;
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          updateEntryFile(entryFileId, entryId, elementOrder)
+        );
+      } else {
+        responseMove.value.operation = false;
+        responseMove.value.message =
+          "Error inesperado al actualizar la sección";
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        updateEntryFile(entryFileId, entryId, elementOrder)
+      );
+    } else {
+      responseMove.value.operation = false;
+      responseMove.value.message = "Error inesperado en el servidor";
+    }
+  }
+};
+
+const updateEntryContent = async (entryContentId, entryId, elementOrder) => {
+  const deleteMutation = PublicationMutations.setUpsertContentEntry({
+    id: entryContentId,
+    entry_id: entryId,
+    element_order: elementOrder,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, contentEntry } =
+        dataMutation.upsertContentEntry;
+
+      if (status_code === 200) {
+        responseMove.value.operation = true;
+        responseMove.value.message = status_message;
+      } else {
+        responseMove.value.operation = false;
+        responseMove.value.message = status_message;
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          updateEntryContent(entryContentId, entryId, elementOrder)
+        );
+      } else {
+        responseMove.value.operation = false;
+        responseMove.value.message =
+          "Error inesperado al actualizar la sección";
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        updateEntryContent(entryContentId, entryId, elementOrder)
+      );
+    } else {
+      responseMove.value.operation = false;
+      responseMove.value.message = "Error inesperado en el servidor";
+    }
+  }
+};
+
+const upsertEntryFileImg = async (
+  etryFileId,
+  entryId,
+  fileImgEntry,
+  fileType,
+  elementOrder
+) => {
+  loadingBtnUploadImg.value = true;
+  loadingBtnUploadPdf.value = true;
+  const initialMutation = PublicationMutations.setUpsertFileEntry({
+    id: etryFileId,
+    entry_id: entryId,
+    url_file: true,
+    element_order: elementOrder,
+    file_type: fileType,
+  });
+
+  console.log("Query generado:", initialMutation);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "multipart/form-data",
+  };
+
+  const formData = new FormData();
+  formData.append(
+    "operations",
+    JSON.stringify({
+      query: initialMutation,
+      variables: {
+        file_entry: null,
+      },
+    })
+  );
+  formData.append("map", JSON.stringify({ 1: ["variables.file_entry"] }));
+  formData.append("1", fileImgEntry);
+
+  const datos = await axios.post(graphqlServerUrl, formData, { headers });
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, file_entry } =
+        dataMutation.upsertFileEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataAboutSection(sectionId.value);
+        closeDialogUploadImg();
+        closeDialogUploadPdf();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntryFileImg(
+            etryFileId,
+            entryId,
+            fileImgEntry,
+            fileType,
+            elementOrder
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar archivo",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntryFileImg(
+          etryFileId,
+          entryId,
+          fileImgEntry,
+          fileType,
+          elementOrder
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const upsertEntryContent = async (
+  entryContentId,
+  entryId,
+  content,
+  contentType,
+  elementOrder
+) => {
+  loadingBtnEntryContent.value = true;
+  const deleteMutation = PublicationMutations.setUpsertContentEntry({
+    id: entryContentId,
+    entry_id: entryId,
+    content: content,
+    content_type: contentType,
+    element_order: elementOrder,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, contentEntry } =
+        dataMutation.upsertContentEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        await getDataAboutSection(sectionId.value);
+        closeDialogEntryContent();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntryContent(
+            entryContentId,
+            entryId,
+            content,
+            contentType,
+            elementOrder
+          )
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar contenido",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntryContent(
+          entryContentId,
+          entryId,
+          content,
+          contentType,
+          elementOrder
+        )
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+// Función que maneja la eliminación de un archivo en el contenido de la entrada
+const deleteEntryFile = async (entryFileId) => {
+  loadingBtnDeleteContent.value = true;
+  const deleteMutation = PublicationMutations.setDeleteFileEntry(entryFileId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteFileEntry;
+
+      if (status_code === 200) {
+        await getDataAboutSection(sectionId.value);
+        closeDialogConfirmContent();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteEntryFile(entryFileId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteEntryFile(entryFileId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+// Función que maneja la eliminación de texto en el contenido de la entrada
+const deleteEntryContent = async (entryContentId) => {
+  loadingBtnDeleteContent.value = true;
+  const deleteMutation =
+    PublicationMutations.setDeleteContentEntry(entryContentId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  console.log(deleteMutation);
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteContentEntry;
+
+      if (status_code === 200) {
+        await getDataAboutSection(sectionId.value);
+        closeDialogConfirmContent();
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteEntryContent(entryContentId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteEntryContent(entryContentId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const executeDeleteContent = async () => {
+  if (!deleteItemContent.value || !deleteItemContent.value.id) {
+    console.warn("No hay un elemento válido para eliminar.");
+    return;
+  }
+
+  try {
+    if (deleteItemContent.value.file_type) {
+      // Si tiene `file_type`, es un archivo y debe eliminarse con `deleteEntryFile`
+      await deleteEntryFile(deleteItemContent.value.id);
+    } else if (deleteItemContent.value.content_type) {
+      // Si tiene `content_type`, es contenido de texto y se elimina con `deleteEntryContent`
+      await deleteEntryContent(deleteItemContent.value.id);
+    } else {
+      console.warn("El elemento no tiene un tipo válido para eliminar.");
+      return;
+    }
+
+    console.log("Eliminación exitosa.");
+  } catch (error) {
+    console.error("Error al eliminar contenido:", error);
+  }
+};
+
 // Función que maneja el cambio de archivo
 const onFileChange = (event) => {
   // Acceder a los archivos seleccionados desde el evento
@@ -693,6 +1893,38 @@ const onFileChange = (event) => {
   //console.log("Archivo asignado:", uploadedFile.value);
 };
 
+// Función que maneja el cambio de archivo
+const onFileChangeEntryImg = (event) => {
+  // Acceder a los archivos seleccionados desde el evento
+  const files = event.target.files;
+
+  // Verificar si hay archivos seleccionados
+  if (files.length > 0) {
+    uploadedFileEntryImg.value = files[0]; // Tomar el primer archivo
+  } else {
+    uploadedFileEntryImg.value = null;
+  }
+
+  // Verificar el archivo cargado
+  //console.log("Archivo asignado:", uploadedFile.value);
+};
+
+// Función que maneja el cambio de archivo
+const onFileChangeEntryPdf = (event) => {
+  // Acceder a los archivos seleccionados desde el evento
+  const files = event.target.files;
+
+  // Verificar si hay archivos seleccionados
+  if (files.length > 0) {
+    uploadedFileEntryPdf.value = files[0]; // Tomar el primer archivo
+  } else {
+    uploadedFileEntryPdf.value = null;
+  }
+
+  // Verificar el archivo cargado
+  //console.log("Archivo asignado:", uploadedFile.value);
+};
+
 const validateDataForm = async () => {
   const { valid } = await formHeader.value.validate();
 
@@ -703,6 +1935,12 @@ const validateDataForm = async () => {
   // Validar que se ha cargado un archivo
   if (!uploadedFile.value) {
     //updateItemPage(2, setTitleHeader.value, "");
+    await updateSectionWithOutImage(
+      sectionId.value,
+      cmsItemIdThis.value,
+      setTitleHeader.value,
+      sectionTypeThis.value
+    );
     return;
   }
 
@@ -723,13 +1961,125 @@ const validateDataForm = async () => {
 
   //updateItemPageWithImage(2, setTitleHeader.value, uploadedFile.value, "");
 
-  updateSectionWithImage(
+  await updateSectionWithImage(
     sectionId.value,
     cmsItemIdThis.value,
     setTitleHeader.value,
     uploadedFile.value,
     sectionTypeThis.value
   );
+  return;
+};
+
+const validateDataFormList = async () => {
+  const { valid } = await formList.value.validate();
+
+  if (valid) {
+    console.log("Formulario válido");
+
+    if (listExists.value) {
+      await upsertEntry(
+        listSelected.value.id,
+        sectionId.value,
+        setListElementTitle.value,
+        listSelected.value.entry_complement
+      );
+    } else {
+      await upsertEntry(null, sectionId.value, setListElementTitle.value, "");
+    }
+  }
+};
+
+const validateDataFormEntryImg = async () => {
+  // Validar que se ha cargado un archivo
+  if (!uploadedFileEntryImg.value) {
+    errorMessage.value = "No se ha cargado ningún archivo."; // Mensaje de error si no se cargó archivo
+    return;
+  }
+
+  // Validar que el archivo sea una instancia de File
+  if (!(uploadedFileEntryImg.value instanceof File)) {
+    errorMessage.value = "El archivo seleccionado no es válido."; // Mensaje de error si no es un archivo válido
+    return;
+  }
+
+  // Validar el formato del archivo (tipo MIME)
+  if (!allowedFormats.includes(uploadedFileEntryImg.value.type)) {
+    errorMessage.value = "Formato de imagen no válido. Use JPG, PNG o BMP."; // Mensaje de error si el formato no es válido
+    return;
+  }
+
+  // Si pasa todas las validaciones, entonces se puede continuar
+  console.log("Archivo válido:", uploadedFileEntryImg.value);
+
+  console.log(entryFileSelected.value);
+
+  const entryFileId = entryFileSelected.value.id || null;
+  const entryId = entryFileSelected.value.entry_id;
+  const elementOrder = entryFileSelected.value.element_order;
+
+  await upsertEntryFileImg(
+    entryFileId,
+    entryId,
+    uploadedFileEntryImg.value,
+    "img",
+    elementOrder
+  );
+};
+
+const validateDataFormEntryPdf = async () => {
+  // Validar que se ha cargado un archivo
+  if (!uploadedFileEntryPdf.value) {
+    errorMessage.value = "No se ha cargado ningun archivo."; // Mensaje de error si no se cargó archivo
+    return;
+  }
+
+  // Validar que el archivo sea una instancia de File
+  if (!(uploadedFileEntryPdf.value instanceof File)) {
+    errorMessage.value = "El archivo seleccionado no es valido."; // Mensaje de error si no es un archivo valido
+    return;
+  }
+
+  // Validar el formato del archivo (tipo MIME)
+  if (!allowedFormatsPdf.includes(uploadedFileEntryPdf.value.type)) {
+    errorMessage.value = "Formato de archivo no valido. Use PDF."; // Mensaje de error si el formato no es valido
+    return;
+  }
+
+  // Si pasa todas las validaciones, entonces se puede continuar
+  console.log("Archivo valido:", uploadedFileEntryPdf.value);
+
+  const entryFileId = entryFileSelected.value.id || null;
+  const entryId = entryFileSelected.value.entry_id;
+  const elementOrder = entryFileSelected.value.element_order;
+
+  await upsertEntryFileImg(
+    entryFileId,
+    entryId,
+    uploadedFileEntryPdf.value,
+    "pdf",
+    elementOrder
+  );
+};
+
+const validateDataFormEntryContent = async () => {
+  const { valid } = await formEntryContent.value.validate();
+  if (valid) {
+    console.log("Formulario válido");
+
+    const entryContentId = entryContentSelected.value.id || null;
+    const entryId = entryContentSelected.value.entry_id;
+    const elementOrder = entryContentSelected.value.element_order;
+    const contentType = entryContentSelected.value.content_type;
+
+    await upsertEntryContent(
+      entryContentId,
+      entryId,
+      setTextEntryContent.value,
+      contentType,
+      elementOrder
+    );
+  }
 };
 
 const refreshTokenAndRetry = async (callback) => {
@@ -764,6 +2114,232 @@ const openDialogConfirmHeader = () => {
   visibleDialogConfirmHeader.value = true;
 };
 
+const openDialogList = (item) => {
+  listExists.value = true;
+  listSelected.value = {};
+  titleDialogList.value = "Editar Elemento";
+  visibleDialogList.value = true;
+  setListElementTitle.value = item.entry_title;
+  listSelected.value = item;
+  console.log(listSelected.value);
+};
+
+const openDialogListNew = (item) => {
+  listExists.value = false;
+  listSelected.value = {};
+  titleDialogList.value = "Crear Nuevo Elemento";
+  visibleDialogList.value = true;
+  setListElementTitle.value = "";
+};
+
+const openDialogDeleteList = (item) => {
+  listSelected.value = item;
+  listElementTitle.value = item.entry_title;
+  visibleDialogConfirmList.value = true;
+};
+
+const openDialogAddContent = () => {
+  console.log(
+    "Elementos ordenados:",
+    orderedEntries.value[selectedIndex.value]
+  );
+  idEntryActive.value = orderedEntries.value[selectedIndex.value].id;
+  visibleDialogTypeContent.value = true;
+};
+
+const openDialogEntryImg = (item) => {
+  console.log("Elemento seleccionado:", item);
+  titleDialogUploadImg.value = "Editar Imagen";
+  imgEditUpload.value = item.url_file;
+  visibleDialogUploadImg.value = true;
+  entryFileSelected.value = item;
+};
+
+const openDialogEntryPdf = (item) => {
+  console.log("Elemento seleccionado:", item);
+  visibleDialogUploadPdf.value = true;
+  entryFileSelected.value = item;
+  titleDialogUploadPdf.value = "Editar PDF";
+};
+
+const openDialogEntryContent = (item) => {
+  console.log("Elemento seleccionado:", item);
+
+  entryContentSelected.value = item;
+
+  switch (item.content_type) {
+    case "h3":
+      titleDialogEntryContent.value = "Editar Título";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "Título";
+      isParagraph.value = false;
+      break;
+    case "h4":
+      titleDialogEntryContent.value = "Editar Subtítulo";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "Subtítulo";
+      isParagraph.value = false;
+      break;
+    case "p":
+      titleDialogEntryContent.value = "Editar Párrafo";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "Párrafo";
+      isParagraph.value = true;
+      break;
+    case "vi":
+      titleDialogEntryContent.value = "Editar link de video";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "link de video";
+      validateYouTube.value = true;
+      isParagraph.value = false;
+      break;
+    default:
+      break;
+  }
+  visibleDialogEntryContent.value = true;
+};
+
+const openDialogEntryImgNew = () => {
+  titleDialogUploadImg.value = "Cargar Imagen";
+  visibleDialogUploadImg.value = true;
+
+  // Obtener el último element_order
+  const combinedEntries =
+    orderedEntries.value[selectedIndex.value]?.combinedEntries || [];
+
+  let elementOrder = 0;
+
+  if (combinedEntries.length === 0) {
+    console.log("No hay elementos en combinedEntries. Último element_order: 0");
+    elementOrder = 1;
+  } else {
+    const lastElementOrder = Math.max(
+      ...combinedEntries.map((entry) => entry.element_order)
+    );
+    console.log("Último element_order:", lastElementOrder);
+    elementOrder = lastElementOrder + 1;
+  }
+
+  entryFileSelected.value = {
+    id: null,
+    entry_id: idEntryActive.value,
+    element_order: elementOrder,
+  };
+
+  console.log(entryFileSelected.value);
+};
+
+const openDialogEntryPdfNew = () => {
+  titleDialogUploadPdf.value = "Cargar Archivo PDF";
+  visibleDialogUploadPdf.value = true;
+
+  // Obtener el último element_order
+  const combinedEntries =
+    orderedEntries.value[selectedIndex.value]?.combinedEntries || [];
+
+  let elementOrder = 0;
+
+  if (combinedEntries.length === 0) {
+    console.log("No hay elementos en combinedEntries. Último element_order: 0");
+    elementOrder = 1;
+  } else {
+    const lastElementOrder = Math.max(
+      ...combinedEntries.map((entry) => entry.element_order)
+    );
+    console.log("Último element_order:", lastElementOrder);
+    elementOrder = lastElementOrder + 1;
+  }
+
+  entryFileSelected.value = {
+    id: null,
+    entry_id: idEntryActive.value,
+    element_order: elementOrder,
+  };
+
+  console.log(entryFileSelected.value);
+};
+
+const openDialogEntryContentNew = (content_type) => {
+  switch (content_type) {
+    case "h3":
+      titleDialogEntryContent.value = "Crear Título";
+      labelEntryContent.value = "Título";
+      isParagraph.value = false;
+      break;
+    case "h4":
+      titleDialogEntryContent.value = "Crear Subtítulo";
+      labelEntryContent.value = "Subtítulo";
+      isParagraph.value = false;
+      break;
+    case "p":
+      titleDialogEntryContent.value = "Crear Párrafo";
+      labelEntryContent.value = "Párrafo";
+      isParagraph.value = true;
+      break;
+    case "vi":
+      titleDialogEntryContent.value = "Cargar link de video";
+      labelEntryContent.value = "link de video";
+      validateYouTube.value = true;
+      isParagraph.value = false;
+      break;
+    default:
+      break;
+  }
+
+  // Obtener el último element_order
+  const combinedEntries =
+    orderedEntries.value[selectedIndex.value]?.combinedEntries || [];
+
+  let elementOrder = 0;
+
+  if (combinedEntries.length === 0) {
+    console.log("No hay elementos en combinedEntries. Último element_order: 0");
+    elementOrder = 1;
+  } else {
+    const lastElementOrder = Math.max(
+      ...combinedEntries.map((entry) => entry.element_order)
+    );
+    console.log("Último element_order:", lastElementOrder);
+    elementOrder = lastElementOrder + 1;
+  }
+
+  entryContentSelected.value = {
+    id: null,
+    entry_id: idEntryActive.value,
+    content_type: content_type,
+    element_order: elementOrder,
+  };
+
+  visibleDialogEntryContent.value = true;
+};
+
+const openDialogRequireContent = () => {
+  console.log("Contenido seleccionado:", radios.value);
+  if (radios.value === "img") {
+    openDialogEntryImgNew();
+  }
+
+  if (
+    radios.value === "h3" ||
+    radios.value === "h4" ||
+    radios.value === "p" ||
+    radios.value === "vi"
+  ) {
+    openDialogEntryContentNew(radios.value);
+  }
+
+  if (radios.value === "pdf") {
+    openDialogEntryPdfNew();
+  }
+};
+
+const openDialogConfirmDelContent = (item) => {
+  console.log("Elemento seleccionado:", item);
+  messageContent.value = "¿Desea eliminar el elemento del contenido?";
+  visibleDialogConfirmContent.value = true;
+  deleteItemContent.value = item;
+};
+
 const closeDialogHeader = () => {
   visibleDialogHeader.value = false;
   setTitleHeader.value = "";
@@ -778,9 +2354,63 @@ const closeDialogConfirmHeader = () => {
   loadingBtnDeleteImage.value = false;
 };
 
+const closeDialogList = () => {
+  visibleDialogList.value = false;
+  loadingBtnEditList.value = false;
+  setListElementTitle.value = "";
+};
+
+const closeDialogConfirmList = () => {
+  visibleDialogConfirmList.value = false;
+  loadingBtnDeleteList.value = false;
+  listSelected.value = {};
+};
+
+const closeDialogUploadImg = () => {
+  visibleDialogUploadImg.value = false;
+  errorMessage.value = "";
+  uploadedFileEntryImg.value = null;
+  loadingBtnUploadImg.value = false;
+  closeDialogTypeContent();
+};
+
+const closeDialogUploadPdf = () => {
+  visibleDialogUploadPdf.value = false;
+  errorMessage.value = "";
+  uploadedFileEntryPdf.value = null;
+  loadingBtnUploadPdf.value = false;
+  closeDialogTypeContent();
+};
+
+const closeDialogEntryContent = () => {
+  visibleDialogEntryContent.value = false;
+  setTextEntryContent.value = "";
+  loadingBtnEntryContent.value = false;
+  titleDialogEntryContent.value = "";
+  labelEntryContent.value = "";
+  isParagraph.value = false;
+  validateYouTube.value = false;
+  closeDialogTypeContent();
+};
+
+const closeDialogTypeContent = () => {
+  visibleDialogTypeContent.value = false;
+  radios.value = "h3";
+};
+
+const closeDialogConfirmContent = () => {
+  visibleDialogConfirmContent.value = false;
+  loadingBtnDeleteContent.value = false;
+};
+
 const closeDialog = () => {
   closeDialogHeader();
   closeDialogConfirmHeader();
+  closeDialogList();
+  closeDialogConfirmList();
+  closeDialogUploadImg();
+  closeDialogUploadPdf();
+  closeDialogEntryContent();
   visibleError.value = false;
 };
 
@@ -800,6 +2430,142 @@ const selectedEntries = computed(() => {
     })) || []
   );
 });
+
+// Computed para aplicar reglas dinámicamente
+const computedRules = computed(() => {
+  let baseRules = [rules.value.required, rules.value.maxLengthRule(250)];
+  if (validateYouTube.value) {
+    baseRules.push(rules.value.youtubeRule);
+  }
+  return baseRules;
+});
+
+const moveUp = async (index) => {
+  if (index > 0) {
+    overlay.value = true;
+
+    const combinedEntries =
+      orderedEntries.value[selectedIndex.value].combinedEntries;
+    const itemToMove = combinedEntries[index];
+    const itemSwapped = combinedEntries[index - 1];
+
+    console.log("Se mueve hacia arriba:", itemToMove);
+    console.log("Se intercambia con:", itemSwapped);
+
+    // Intercambiar element_order
+    const tempOrder = itemToMove.element_order;
+    itemToMove.element_order = itemSwapped.element_order;
+    itemSwapped.element_order = tempOrder;
+
+    // Reordenar en el array
+    combinedEntries.splice(index, 1);
+    combinedEntries.splice(index - 1, 0, itemToMove);
+
+    // Enviar las actualizaciones al backend
+    if (itemToMove.file_type) {
+      await updateEntryFile(
+        itemToMove.id,
+        itemToMove.entry_id,
+        itemToMove.element_order
+      );
+    } else if (itemToMove.content_type) {
+      await updateEntryContent(
+        itemToMove.id,
+        itemToMove.entry_id,
+        itemToMove.element_order
+      );
+    }
+
+    if (itemSwapped.file_type) {
+      await updateEntryFile(
+        itemSwapped.id,
+        itemSwapped.entry_id,
+        itemSwapped.element_order
+      );
+    } else if (itemSwapped.content_type) {
+      await updateEntryContent(
+        itemSwapped.id,
+        itemSwapped.entry_id,
+        itemSwapped.element_order
+      );
+    }
+
+    if (responseMove.value.operation === true) {
+      overlay.value = false;
+    } else {
+      overlay.value = false;
+      handleError({
+        code: 500,
+        message: responseMove.value.message,
+      });
+    }
+  }
+};
+
+const moveDown = async (index) => {
+  if (
+    index <
+    orderedEntries.value[selectedIndex.value].combinedEntries.length - 1
+  ) {
+    overlay.value = true;
+
+    const combinedEntries =
+      orderedEntries.value[selectedIndex.value].combinedEntries;
+    const itemToMove = combinedEntries[index];
+    const itemSwapped = combinedEntries[index + 1];
+
+    console.log("Se mueve hacia abajo:", itemToMove);
+    console.log("Se intercambia con:", itemSwapped);
+
+    // Intercambiar element_order
+    const tempOrder = itemToMove.element_order;
+    itemToMove.element_order = itemSwapped.element_order;
+    itemSwapped.element_order = tempOrder;
+
+    // Reordenar en el array
+    combinedEntries.splice(index, 1);
+    combinedEntries.splice(index + 1, 0, itemToMove);
+
+    // Enviar las actualizaciones al backend
+    if (itemToMove.file_type) {
+      await updateEntryFile(
+        itemToMove.id,
+        itemToMove.entry_id,
+        itemToMove.element_order
+      );
+    } else if (itemToMove.content_type) {
+      await updateEntryContent(
+        itemToMove.id,
+        itemToMove.entry_id,
+        itemToMove.element_order
+      );
+    }
+
+    if (itemSwapped.file_type) {
+      await updateEntryFile(
+        itemSwapped.id,
+        itemSwapped.entry_id,
+        itemSwapped.element_order
+      );
+    } else if (itemSwapped.content_type) {
+      await updateEntryContent(
+        itemSwapped.id,
+        itemSwapped.entry_id,
+        itemSwapped.element_order
+      );
+    }
+
+    if (responseMove.value.operation === true) {
+      overlay.value = false;
+    } else {
+      overlay.value = false;
+      handleError({
+        code: 500,
+        message: responseMove.value.message,
+      });
+    }
+  }
+};
 
 onMounted(async () => {
   const tokenExists = checkLocalStorageData("TokenCollaboratorCms");

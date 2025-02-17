@@ -386,7 +386,7 @@
           text="Guardar"
           variant="flat"
           :loading="loadingBtnEditLinks"
-          @click="validateDataFormLinks(false)"
+          @click="validateDataFormLinks()"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -476,7 +476,7 @@
   </v-dialog>
 
   <!-- Dialogo de Error -->
-  <v-dialog v-model="visibleError" max-width="500px">
+  <v-dialog v-model="visibleError" persistent max-width="500px">
     <v-card>
       <v-card-title class="headline">Error</v-card-title>
       <v-divider class="mt-3"></v-divider>

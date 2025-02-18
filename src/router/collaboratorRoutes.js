@@ -48,6 +48,14 @@ export default [
             "@/components/publication_components/about_folder/AboutEntry.vue"
           ),
       },
+      {
+        path: "pagina-rutas",
+        name: "RoutesOp",
+        component: () =>
+          import(
+            "@/components/publication_components/RoutesOperation.vue"
+          ),
+      },
     ],
   },
 ];

@@ -96,6 +96,7 @@ export const menuItems = [
         title: "Pagina de Rutas",
         icon: "mdi-routes",
         permission: 6,
+        route: { name: "RoutesOp" },
       },
       {
         title: "Pagina de Noticias",

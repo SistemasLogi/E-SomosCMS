@@ -102,6 +102,7 @@ export const menuItems = [
         title: "Pagina de Noticias",
         icon: "mdi-newspaper",
         permission: 7,
+        route: { name: "NewsOp" },
       },
       {
         title: "Pagina de Trabaja Con Nosotros",

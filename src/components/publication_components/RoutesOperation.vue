@@ -100,12 +100,14 @@
                 color="error"
                 variant="text"
                 v-tooltip:top="'Eliminar sección'"
+                @click="openDialogConfirmSection(section)"
               ></v-btn>
               <v-btn
                 icon="mdi-file-document-edit"
                 color="dark"
                 variant="text"
                 v-tooltip:top="'Configurar entrada'"
+                @click="configureEntry(section)"
               ></v-btn>
             </v-card>
           </v-col>
@@ -326,7 +328,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="setTitleSection"
-                label="Título sección"
+                label="Título sección (nombre ruta)"
                 color="primary"
                 base-color="primary"
                 density="comfortable"
@@ -358,6 +360,49 @@
           variant="flat"
           :loading="loadingBtnSection"
           @click="validateDataFormSection"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialogo de Confirmar Eliminar una sección -->
+  <v-dialog v-model="visibleDialogConfirmSection" max-width="600px" persistent>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Confirmar...
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="closeDialogConfirmSection"
+        ></v-btn>
+      </v-card-title>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-text
+        ><v-alert
+          :title="titleConfirmDeleteSection"
+          type="warning"
+          variant="tonal"
+          ><p style="color: black">
+            {{ textDialogConfirmDeleteSection }}
+          </p>
+        </v-alert>
+      </v-card-text>
+      <v-divider class="mt-3"></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          text
+          @click="closeDialogConfirmSection"
+          >No
+        </v-btn>
+        <v-btn
+          color="primary"
+          text="Si"
+          variant="tonal"
+          :loading="loadingBtnDeleteSection"
+          @click="executeDeleteSection"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -402,6 +447,10 @@ const imgEditRoute = ref(null);
 const setTitleSection = ref("");
 const idSectionEdit = ref(null);
 const formSection = ref(null);
+const visibleDialogConfirmSection = ref(false);
+const loadingBtnDeleteSection = ref(false);
+const titleConfirmDeleteSection = ref("");
+const textDialogConfirmDeleteSection = ref("");
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const rules = ref({
   required: (value) => !!value || "Requerido.",
@@ -699,6 +748,62 @@ const executeDeleteImage = async () => {
   await deleteimageHeader(3);
 };
 
+// Eliminar una sección
+const deleteSection = async (sectionId) => {
+  loadingBtnDeleteSection.value = true;
+  const deleteMutation = PublicationMutations.setDeleteSection(sectionId);
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: deleteMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message } = dataMutation.deleteSection;
+
+      if (status_code === 200) {
+        await getDataRoutePage(3);
+        closeDialogConfirmSection();
+        loadingBtnDeleteSection.value = false;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() => deleteSection(sectionId));
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar la sección",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() => deleteSection(sectionId));
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
+const executeDeleteSection = async () => {
+  await deleteSection(idSectionEdit.value);
+};
+
 const validateDataFormSection = async () => {
   const { valid } = await formSection.value.validate();
 
@@ -907,6 +1012,26 @@ const upsertSectionWithImage = async (
   }
 };
 
+const slugify = (text) => {
+  return text
+    .normalize("NFD") // Normaliza caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, "") // Elimina diacríticos (acentos, tildes)
+    .replace(/[^a-zA-Z0-9\s-]/g, "") // Elimina caracteres especiales
+    .trim() // Elimina espacios al inicio y final
+    .replace(/\s+/g, "-") // Reemplaza espacios por guiones
+    .toLowerCase(); // Convierte a minúsculas
+};
+
+const configureEntry = (section) => {
+  console.log("Configurar Entrada:", section);
+  const cleanTitle = slugify(section.section_title);
+
+  router.push({
+    name: "EntryRoute",
+    params: { id: section.id, title: cleanTitle },
+  });
+};
+
 const refreshTokenAndRetry = async (callback) => {
   const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
   const responseRefresh = await getTokenRefreshKeyCollaborator(encriptedKey);
@@ -954,6 +1079,14 @@ const openDialogEditSection = (section) => {
   }
 };
 
+const openDialogConfirmSection = (section) => {
+  titleConfirmDeleteSection.value = "Eliminar Sección " + section.section_title;
+  textDialogConfirmDeleteSection.value =
+    "¿Desea eliminar la sección " + section.section_title + "?";
+  idSectionEdit.value = section.id;
+  visibleDialogConfirmSection.value = true;
+};
+
 const closeDialogHeader = () => {
   visibleDialogHeader.value = false;
   setTitleHeader.value = "";
@@ -978,10 +1111,16 @@ const closeDialogSection = () => {
   errorMessage.value = "";
 };
 
+const closeDialogConfirmSection = () => {
+  loadingBtnDeleteSection.value = false;
+  visibleDialogConfirmSection.value = false;
+};
+
 const closeDialog = () => {
   closeDialogHeader();
   closeDialogConfirmHeader();
   closeDialogSection();
+  closeDialogConfirmSection();
   visibleError.value = false;
 };
 

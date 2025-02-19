@@ -56,6 +56,22 @@ export default [
             "@/components/publication_components/RoutesOperation.vue"
           ),
       },
+      {
+        path: "rutas-entrada/:id/nombre/:title",
+        name: "EntryRoute",
+        component: () =>
+          import(
+            "@/components/publication_components/routes_folder/RouteEntry.vue"
+          ),
+      },
+      {
+        path: "pagina-noticias",
+        name: "NewsOp",
+        component: () =>
+          import(
+            "@/components/publication_components/News.vue"
+          ),
+      },
     ],
   },
 ];

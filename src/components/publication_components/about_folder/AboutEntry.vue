@@ -810,7 +810,7 @@
               variant="solo-filled"
               rows="5"
               clearable
-              :rules="[rules.required, rules.maxLengthRule(600)]"
+              :rules="[rules.required, rules.maxLengthRule(900)]"
             ></v-textarea>
           </v-col>
           <v-col cols="12" v-else>

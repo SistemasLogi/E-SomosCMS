@@ -72,6 +72,14 @@ export default [
             "@/components/publication_components/News.vue"
           ),
       },
+      {
+        path: "noticias-entrada/:id/nombre/:title",
+        name: "EntryNews",
+        component: () =>
+          import(
+            "@/components/publication_components/news_folder/NewEntry.vue"
+          ),
+      },
     ],
   },
 ];

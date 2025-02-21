@@ -6,4 +6,10 @@ export const logoCompany = new URL("@/assets/efontibon.png", import.meta.url).hr
 
 export const imagenBanner = new URL("@/assets/menua_1.jpg", import.meta.url).href;
 
-export const imagenRoute = new URL("@/assets/imagenes-corporativas/4-1 Bochica.jpg", import.meta.url).href;
+export const imagenRoute = new URL("@/assets/imagenes-corporativas/arbol-2.png", import.meta.url).href;
+
+export const imagenNews1 = new URL("@/assets/imagenes-corporativas/noticia-horizontal.png", import.meta.url).href;
+
+export const imagenNews2 = new URL("@/assets/imagenes-corporativas/noticia-horizontal2.png", import.meta.url).href;
+
+export const imagenNews3 = new URL("@/assets/imagenes-corporativas/noticia-vertical.png", import.meta.url).href;

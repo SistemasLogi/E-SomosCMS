@@ -1162,6 +1162,65 @@ const upsertEntryFileImg = async (
   }
 };
 
+// Actualizar o crear una sección sin imagen
+const upsertEntry = async (sectionId, entryTitle, entryComplement) => {
+  loadingBtnEntryContent.value = true;
+  const updateMutation = PublicationMutations.setUpsertEntry({
+    section_id: sectionId,
+    entry_title: entryTitle,
+    entry_complement: entryComplement,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, entry } = dataMutation.upsertEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        entryContentSelected.value.entry_id = entry.id;
+        return entry.id;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntry(sectionId, entryTitle, entryComplement)
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar o crear el enlace",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntry(sectionId, entryTitle, entryComplement)
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
 const upsertEntryContent = async (
   entryContentId,
   entryId,
@@ -1305,10 +1364,19 @@ const validateDataFormEntryContent = async () => {
     console.log("Formulario válido");
 
     const entryContentId = entryContentSelected.value.id || null;
-    const entryId = entryContentSelected.value.entry_id;
+    let entryId = entryContentSelected.value.entry_id;
     const elementOrder = entryContentSelected.value.element_order;
     const contentType = entryContentSelected.value.content_type;
 
+    if (entryId === null) {
+      console.log("entryId es null");
+      entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
+
+      if (!entryId) {
+        console.error("No se pudo crear la entrada.");
+        return; // Detiene la ejecución si no se creó correctamente
+      }
+    }
     await upsertEntryContent(
       entryContentId,
       entryId,
@@ -1344,8 +1412,18 @@ const validateDataFormEntryImg = async () => {
   console.log(entryFileSelected.value);
 
   const entryFileId = entryFileSelected.value.id || null;
-  const entryId = entryFileSelected.value.entry_id;
+  let entryId = entryFileSelected.value.entry_id;
   const elementOrder = entryFileSelected.value.element_order;
+
+  if (entryId === null) {
+    console.log("entryId es null");
+    entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
+
+    if (!entryId) {
+      console.error("No se pudo crear la entrada.");
+      return; // Detiene la ejecución si no se creó correctamente
+    }
+  }
 
   await upsertEntryFileImg(
     entryFileId,
@@ -1502,7 +1580,6 @@ const selectedEntries = computed(() => {
   );
 });
 
-
 const updateEntryFile = async (entryFileId, entryId, elementOrder) => {
   const deleteMutation = PublicationMutations.setUpsertFileEntry({
     id: entryFileId,
@@ -1617,7 +1694,6 @@ const updateEntryContent = async (entryContentId, entryId, elementOrder) => {
   }
 };
 
-
 const openDialogEntryImgNew = () => {
   titleDialogUploadImg.value = "Cargar Imagen";
   visibleDialogUploadImg.value = true;
@@ -1702,7 +1778,12 @@ const openDialogEntryContentNew = (content_type) => {
 
 const openDialogAddContent = () => {
   console.log("Elementos ordenados:", orderedEntries.value[0]);
-  idEntryActive.value = orderedEntries.value[0].id;
+  if (orderedEntries.value[0] !== undefined) {
+    idEntryActive.value = orderedEntries.value[0].id;
+  } else {
+    idEntryActive.value = null;
+  }
+
   visibleDialogTypeContent.value = true;
 };
 
@@ -1748,6 +1829,7 @@ const closeDialogConfirmHeader = () => {
 
 const closeDialogTypeContent = () => {
   visibleDialogTypeContent.value = false;
+  loadingBtnEntryContent.value = false;
   radios.value = "h2";
 };
 
@@ -1904,6 +1986,12 @@ const moveDown = async (index) => {
       });
     }
   }
+};
+
+const handleError = (response) => {
+  codeError.value = `Error: ${response.code}`;
+  textDialog.value = response.message;
+  visibleError.value = true;
 };
 
 onMounted(async () => {

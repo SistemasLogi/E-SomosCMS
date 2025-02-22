@@ -41,7 +41,7 @@
     </v-card>
 
     <v-card class="mt-5 pa-4">
-      <v-container style="max-width: 1500px">
+      <v-container style="max-width: 1600px">
         <v-row justify="center" class="mt-5 mb-5" v-if="loadingData">
           <v-col cols="12" lg="3">
             <v-skeleton-loader
@@ -51,213 +51,294 @@
           </v-col>
         </v-row>
 
-        <v-col cols="12">
-          <template v-for="(entry, index) in selectedEntries" :key="index">
-            <!-- Renderizar imágenes -->
-            <v-col v-if="entry.file_type === 'img'" cols="12">
-              <v-row>
-                <v-col cols="9">
-                  <v-img
-                    width="900px"
-                    class="mx-auto"
-                    :src="entry.url_file"
-                  ></v-img>
-                </v-col>
-                <v-col cols="3">
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Editar imagen'"
-                    @click="openDialogEntryImg(entry)"
-                  >
-                    <v-icon color="primary">mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Eliminar imagen'"
-                    @click="openDialogConfirmDelContent(entry)"
-                  >
-                    <v-icon color="danger">mdi-delete</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Subir imagen'"
-                    @click="moveUp(index)"
-                    :disabled="index === 0"
-                  >
-                    <v-icon>mdi-arrow-up</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Bajar imagen'"
-                    @click="moveDown(index)"
-                    :disabled="index === selectedEntries.length - 1"
-                  >
-                    <v-icon>mdi-arrow-down</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-
-            <!-- Renderizar títulos -->
-            <v-col v-else-if="entry.content_type?.startsWith('h')" cols="12">
-              <v-row>
-                <v-col cols="9">
-                  <component :is="entry.content_type">{{
-                    entry.content
-                  }}</component>
-                </v-col>
-                <v-col cols="3">
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Editar título'"
-                    @click="openDialogEntryContent(entry)"
-                  >
-                    <v-icon color="primary">mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Eliminar título'"
-                    @click="openDialogConfirmDelContent(entry)"
-                  >
-                    <v-icon color="danger">mdi-delete</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Subir titulo'"
-                    @click="moveUp(index)"
-                    :disabled="index === 0"
-                  >
-                    <v-icon>mdi-arrow-up</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Bajar titulo'"
-                    @click="moveDown(index)"
-                    :disabled="index === selectedEntries.length - 1"
-                  >
-                    <v-icon>mdi-arrow-down</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-
-            <!-- Renderizar párrafos -->
-            <v-col v-else-if="entry.content_type === 'p'" cols="12">
-              <v-row>
-                <v-col cols="9">
-                  <p>{{ entry.content }}</p>
-                </v-col>
-                <v-col cols="3">
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Editar párrafo'"
-                    @click="openDialogEntryContent(entry)"
-                  >
-                    <v-icon color="primary">mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Eliminar párrafo'"
-                    @click="openDialogConfirmDelContent(entry)"
-                  >
-                    <v-icon color="danger">mdi-delete</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Subir párrafo'"
-                    @click="moveUp(index)"
-                    :disabled="index === 0"
-                  >
-                    <v-icon>mdi-arrow-up</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    v-tooltip:top="'Bajar párrafo'"
-                    @click="moveDown(index)"
-                    :disabled="index === selectedEntries.length - 1"
-                  >
-                    <v-icon>mdi-arrow-down</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-          </template>
-        </v-col>
-
         <v-row>
-          <v-col cols="12" md="6">
-            <h3>Titiulo Noticia</h3>
-            <p>
-              Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-              irure dolor in reprehenderit in voluptate velit esse cillum dolore
-              eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-              proident, sunt in culpa qui officia deserunt mollit anim id est
-              laborum
-            </p>
+          <v-col cols="12" md="7">
+            <template v-for="(entry, index) in selectedEntries" :key="index">
+              <!-- Renderizar títulos -->
+              <v-col v-if="entry.content_type?.startsWith('h')" cols="12">
+                <v-row>
+                  <v-col cols="3">
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Editar título'"
+                      @click="openDialogEntryContent(entry)"
+                    >
+                      <v-icon color="primary">mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Eliminar título'"
+                      @click="openDialogConfirmDelContent(entry)"
+                    >
+                      <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir titulo'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar titulo'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="9">
+                    <component :is="entry.content_type">{{
+                      entry.content
+                    }}</component>
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!-- Renderizar párrafos -->
+              <v-col v-else-if="entry.content_type === 'p'" cols="12">
+                <v-row>
+                  <v-col cols="3">
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Editar párrafo'"
+                      @click="openDialogEntryContent(entry)"
+                    >
+                      <v-icon color="primary">mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Eliminar párrafo'"
+                      @click="openDialogConfirmDelContent(entry)"
+                    >
+                      <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir párrafo'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar párrafo'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="9">
+                    <p>{{ entry.content }}</p>
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!-- Renderizar videos -->
+              <v-col v-else-if="entry.content_type === 'vi'" cols="12">
+                <v-row>
+                  <v-col cols="3">
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Editar video'"
+                      @click="openDialogEntryContent(entry)"
+                    >
+                      <v-icon color="primary">mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Eliminar video'"
+                      @click="openDialogConfirmDelContent(entry)"
+                    >
+                      <v-icon color="danger">mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Subir video'"
+                      @click="moveUp(index)"
+                      :disabled="index === 0"
+                    >
+                      <v-icon>mdi-arrow-up</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Bajar video'"
+                      @click="moveDown(index)"
+                      :disabled="index === selectedEntries.length - 1"
+                    >
+                      <v-icon>mdi-arrow-down</v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="9">
+                    <iframe
+                      width="100%"
+                      height="400"
+                      :src="entry.content"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    ></iframe>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </template>
+            <v-col cols="12">
+              <v-btn
+                color="primary"
+                size="large"
+                rounded="lg"
+                block
+                class="text-none"
+                append-icon="mdi-sticker-plus"
+                @click="openDialogAddContent"
+              >
+                Agregar Contenido
+              </v-btn>
+            </v-col>
           </v-col>
           <!-- Sección de imágenes -->
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="5">
             <v-row>
               <!-- Imagen grande a la izquierda -->
               <v-col cols="12" md="6">
-                <v-img
-                  :src="imagenNews3"
-                  class="rounded-lg"
-                  height="100%"
-                  cover
-                ></v-img>
+                <v-card rounded="lg">
+                  <v-img
+                    :src="imagenNews3"
+                    class="rounded-lg"
+                    height="100%"
+                    cover
+                  ></v-img>
+                </v-card>
+                <v-card class="d-flex flex-wrap align-center pa-2">
+                  <!-- Texto (subtitle) -->
+                  <div class="text-caption flex-grow-1 text-wrap">
+                    Imagen Vertical
+                  </div>
+
+                  <!-- Botones -->
+                  <div class="d-flex">
+                    <v-btn
+                      size="small"
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Editar imagen'"
+                      @click="openDialogEntryImg(entry)"
+                    >
+                      <v-icon color="primary">mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      icon
+                      variant="text"
+                      v-tooltip:top="'Eliminar imagen'"
+                      @click="openDialogConfirmDelContent(entry)"
+                    >
+                      <v-icon color="error">mdi-delete</v-icon>
+                    </v-btn>
+                  </div>
+                </v-card>
               </v-col>
 
               <!-- Dos imágenes pequeñas a la derecha -->
               <v-col cols="12" md="6">
                 <v-row class="gy-4">
                   <v-col cols="12">
-                    <v-img
-                      :src="imagenNews1"
-                      class="rounded-lg"
-                      height="100%"
-                      cover
-                    ></v-img>
+                    <v-card rounded="lg">
+                      <v-img
+                        :src="imagenNews1"
+                        class="rounded-lg"
+                        height="100%"
+                        cover
+                      ></v-img>
+                    </v-card>
+                    <v-card class="d-flex flex-wrap align-center pa-2">
+                      <!-- Texto (subtitle) -->
+                      <div class="text-caption flex-grow-1 text-wrap">
+                        Imagen Horizontal
+                      </div>
+
+                      <!-- Botones -->
+                      <div class="d-flex">
+                        <v-btn
+                          size="small"
+                          icon
+                          variant="text"
+                          v-tooltip:top="'Editar imagen'"
+                          @click="openDialogEntryImg(entry)"
+                        >
+                          <v-icon color="primary">mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn
+                          size="small"
+                          icon
+                          variant="text"
+                          v-tooltip:top="'Eliminar imagen'"
+                          @click="openDialogConfirmDelContent(entry)"
+                        >
+                          <v-icon color="error">mdi-delete</v-icon>
+                        </v-btn>
+                      </div>
+                    </v-card>
                   </v-col>
                   <v-col cols="12">
-                    <v-img
-                      :src="imagenNews2"
-                      class="rounded-lg"
-                      height="100%"
-                      cover
-                    ></v-img>
+                    <v-card rounded="lg">
+                      <v-img
+                        :src="imagenNews2"
+                        class="rounded-lg"
+                        height="100%"
+                        cover
+                      ></v-img>
+                    </v-card>
+                    <v-card class="d-flex flex-wrap align-center pa-2">
+                      <!-- Texto (subtitle) -->
+                      <div class="text-caption flex-grow-1 text-wrap">
+                        Imagen Horizontal
+                      </div>
+
+                      <!-- Botones -->
+                      <div class="d-flex">
+                        <v-btn
+                          size="small"
+                          icon
+                          variant="text"
+                          v-tooltip:top="'Editar imagen'"
+                          @click="openDialogEntryImg(entry)"
+                        >
+                          <v-icon color="primary">mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn
+                          size="small"
+                          icon
+                          variant="text"
+                          v-tooltip:top="'Eliminar imagen'"
+                          @click="openDialogConfirmDelContent(entry)"
+                        >
+                          <v-icon color="error">mdi-delete</v-icon>
+                        </v-btn>
+                      </div>
+                    </v-card>
                   </v-col>
                 </v-row>
               </v-col>
             </v-row>
           </v-col>
         </v-row>
-
-        <v-col cols="12">
-          <v-btn
-            color="primary"
-            size="large"
-            rounded="lg"
-            block
-            class="text-none"
-            append-icon="mdi-sticker-plus"
-            @click="openDialogAddContent"
-          >
-            Agregar Contenido
-          </v-btn>
-        </v-col>
       </v-container>
     </v-card>
   </v-container>
@@ -441,10 +522,17 @@
               publicar
             </div>
           </template>
-          <v-radio value="h2">
+          <v-radio value="h3">
             <template v-slot:label>
               <div>
                 <h3>Titulo</h3>
+              </div>
+            </template>
+          </v-radio>
+          <v-radio value="h4">
+            <template v-slot:label>
+              <div>
+                <h4>Subtitulo</h4>
               </div>
             </template>
           </v-radio>
@@ -455,9 +543,9 @@
               </div>
             </template>
           </v-radio>
-          <v-radio value="img">
+          <v-radio value="vi">
             <template v-slot:label>
-              <div>Imagen</div>
+              <div>Video de <strong class="text-danger">YouTube</strong></div>
             </template>
           </v-radio>
         </v-radio-group>
@@ -597,7 +685,7 @@
               density="comfortable"
               variant="solo-filled"
               clearable
-              :rules="[rules.required, rules.maxLengthRule(250)]"
+              :rules="computedRules"
             ></v-text-field>
           </v-col>
         </v-form>
@@ -734,7 +822,7 @@ const uploadedFile = ref(null);
 const loadingBtnDeleteImage = ref(false);
 const visibleDialogTypeContent = ref(false);
 const idEntryActive = ref(null);
-const radios = ref("h2");
+const radios = ref("h3");
 const visibleDialogUploadImg = ref(false);
 const titleDialogUploadImg = ref("");
 const entryFileSelected = ref({});
@@ -754,6 +842,7 @@ const messageContent = ref("");
 const loadingBtnDeleteContent = ref(false);
 const deleteItemContent = ref({});
 const overlay = ref(false);
+const validateYouTube = ref(false);
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const responseMove = ref({
   operation: false,
@@ -1315,6 +1404,65 @@ const combineAndSortEntries = (entryes) => {
   });
 };
 
+// Actualizar o crear una sección sin imagen
+const upsertEntry = async (sectionId, entryTitle, entryComplement) => {
+  loadingBtnEntryContent.value = true;
+  const updateMutation = PublicationMutations.setUpsertEntry({
+    section_id: sectionId,
+    entry_title: entryTitle,
+    entry_complement: entryComplement,
+  });
+
+  const token = localStorage.TokenCollaboratorCms;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const datos = await axios.post(
+    graphqlServerUrl,
+    {
+      query: updateMutation,
+    },
+    { headers }
+  );
+  console.log(datos);
+  try {
+    if (datos && datos.data && datos.data.data) {
+      const dataMutation = datos.data.data;
+      const { status_code, status_message, entry } = dataMutation.upsertEntry;
+
+      if (status_code === 200 || status_code === 201) {
+        entryContentSelected.value.entry_id = entry.id;
+        return entry.id;
+      } else {
+        handleError({
+          code: status_code,
+          message: status_message,
+        });
+      }
+    } else {
+      if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+        await refreshTokenAndRetry(() =>
+          upsertEntry(sectionId, entryTitle, entryComplement)
+        );
+      } else {
+        handleError({
+          code: 500,
+          message: "Error inesperado al actualizar o crear el enlace",
+        });
+      }
+    }
+  } catch (error) {
+    if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
+      await refreshTokenAndRetry(() =>
+        upsertEntry(sectionId, entryTitle, entryComplement)
+      );
+    } else {
+      handleError({ code: 500, message: "Error inesperado en el servidor" });
+    }
+  }
+};
+
 const refreshTokenAndRetry = async (callback) => {
   const encriptedKey = localStorage.EncryptedKeyCollaboratorCms;
   const responseRefresh = await getTokenRefreshKeyCollaborator(encriptedKey);
@@ -1360,9 +1508,19 @@ const validateDataFormEntryContent = async () => {
     console.log("Formulario válido");
 
     const entryContentId = entryContentSelected.value.id || null;
-    const entryId = entryContentSelected.value.entry_id;
+    let entryId = entryContentSelected.value.entry_id;
     const elementOrder = entryContentSelected.value.element_order;
     const contentType = entryContentSelected.value.content_type;
+
+    if (entryId === null) {
+      console.log("entryId es null");
+      entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
+
+      if (!entryId) {
+        console.error("No se pudo crear la entrada.");
+        return; // Detiene la ejecución si no se creó correctamente
+      }
+    }
 
     await upsertEntryContent(
       entryContentId,
@@ -1706,22 +1864,38 @@ const openDialogRequireContent = () => {
     openDialogEntryImgNew();
   }
 
-  if (radios.value === "h2" || radios.value === "p") {
+  if (
+    radios.value === "h3" ||
+    radios.value === "h4" ||
+    radios.value === "p" ||
+    radios.value === "vi"
+  ) {
     openDialogEntryContentNew(radios.value);
   }
 };
 
 const openDialogEntryContentNew = (content_type) => {
   switch (content_type) {
-    case "h2":
+    case "h3":
       titleDialogEntryContent.value = "Crear Título";
       labelEntryContent.value = "Título";
+      isParagraph.value = false;
+      break;
+    case "h4":
+      titleDialogEntryContent.value = "Crear Subtítulo";
+      labelEntryContent.value = "Subtítulo";
       isParagraph.value = false;
       break;
     case "p":
       titleDialogEntryContent.value = "Crear Párrafo";
       labelEntryContent.value = "Párrafo";
       isParagraph.value = true;
+      break;
+    case "vi":
+      titleDialogEntryContent.value = "Cargar link de video";
+      labelEntryContent.value = "link de video";
+      validateYouTube.value = true;
+      isParagraph.value = false;
       break;
     default:
       break;
@@ -1755,7 +1929,11 @@ const openDialogEntryContentNew = (content_type) => {
 
 const openDialogAddContent = () => {
   console.log("Elementos ordenados:", orderedEntries.value[0]);
-  idEntryActive.value = orderedEntries.value[0].id;
+  if (orderedEntries.value[0] !== undefined) {
+    idEntryActive.value = orderedEntries.value[0].id;
+  } else {
+    idEntryActive.value = null;
+  }
   visibleDialogTypeContent.value = true;
 };
 
@@ -1801,7 +1979,7 @@ const closeDialogConfirmHeader = () => {
 
 const closeDialogTypeContent = () => {
   visibleDialogTypeContent.value = false;
-  radios.value = "h2";
+  radios.value = "h3";
 };
 
 const closeDialogUploadImg = () => {
@@ -1819,6 +1997,7 @@ const closeDialogEntryContent = () => {
   titleDialogEntryContent.value = "";
   labelEntryContent.value = "";
   isParagraph.value = false;
+  validateYouTube.value = false;
   closeDialogTypeContent();
 };
 
@@ -1958,6 +2137,15 @@ const moveDown = async (index) => {
     }
   }
 };
+
+// Computed para aplicar reglas dinámicamente
+const computedRules = computed(() => {
+  let baseRules = [rules.value.required, rules.value.maxLengthRule(250)];
+  if (validateYouTube.value) {
+    baseRules.push(rules.value.youtubeRule);
+  }
+  return baseRules;
+});
 
 onMounted(async () => {
   const tokenExists = checkLocalStorageData("TokenCollaboratorCms");

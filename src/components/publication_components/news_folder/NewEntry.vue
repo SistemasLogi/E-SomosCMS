@@ -51,7 +51,7 @@
           </v-col>
         </v-row>
 
-        <v-row>
+        <v-row v-if="!loadingData">
           <v-col cols="12" md="7">
             <template v-for="(entry, index) in selectedEntries" :key="index">
               <!-- Renderizar títulos -->
@@ -217,15 +217,18 @@
             <v-row>
               <!-- Imagen grande a la izquierda -->
               <v-col cols="12" md="6">
-                <v-card rounded="lg">
+                <v-card rounded="lg" v-if="imagenVertical">
                   <v-img
-                    :src="imagenNews3"
+                    :src="imagenVertical.url_file"
                     class="rounded-lg"
                     height="100%"
                     cover
                   ></v-img>
                 </v-card>
-                <v-card class="d-flex flex-wrap align-center pa-2">
+                <v-card
+                  class="d-flex flex-wrap align-center pa-2"
+                  v-if="imagenVertical"
+                >
                   <!-- Texto (subtitle) -->
                   <div class="text-caption flex-grow-1 text-wrap">
                     Imagen Vertical
@@ -238,7 +241,7 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Editar imagen'"
-                      @click="openDialogEntryImg(entry)"
+                      @click="openDialogEntryImg(imagenVertical)"
                     >
                       <v-icon color="primary">mdi-pencil</v-icon>
                     </v-btn>
@@ -247,11 +250,27 @@
                       icon
                       variant="text"
                       v-tooltip:top="'Eliminar imagen'"
-                      @click="openDialogConfirmDelContent(entry)"
+                      @click="openDialogConfirmDelContent(imagenVertical)"
                     >
                       <v-icon color="error">mdi-delete</v-icon>
                     </v-btn>
                   </div>
+                </v-card>
+                <v-card
+                  rounded="lg"
+                  class="add-card d-flex flex-column align-center text-center pa-4"
+                  @click="openDialogEntryImgNew('v')"
+                  v-if="!imagenVertical"
+                >
+                  <v-btn
+                    icon="mdi-plus"
+                    color="primary"
+                    fab
+                    class="floating-btn animate-pulse"
+                  ></v-btn>
+                  <v-card-title class="responsive-title mt-3"
+                    >Agregar Imagen Vertical</v-card-title
+                  >
                 </v-card>
               </v-col>
 
@@ -259,15 +278,18 @@
               <v-col cols="12" md="6">
                 <v-row class="gy-4">
                   <v-col cols="12">
-                    <v-card rounded="lg">
+                    <v-card rounded="lg" v-if="imagenesHorizontales[0]">
                       <v-img
-                        :src="imagenNews1"
+                        :src="imagenesHorizontales[0].url_file"
                         class="rounded-lg"
                         height="100%"
                         cover
                       ></v-img>
                     </v-card>
-                    <v-card class="d-flex flex-wrap align-center pa-2">
+                    <v-card
+                      class="d-flex flex-wrap align-center pa-2"
+                      v-if="imagenesHorizontales[0]"
+                    >
                       <!-- Texto (subtitle) -->
                       <div class="text-caption flex-grow-1 text-wrap">
                         Imagen Horizontal
@@ -280,7 +302,7 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Editar imagen'"
-                          @click="openDialogEntryImg(entry)"
+                          @click="openDialogEntryImg(imagenesHorizontales[0])"
                         >
                           <v-icon color="primary">mdi-pencil</v-icon>
                         </v-btn>
@@ -289,23 +311,42 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Eliminar imagen'"
-                          @click="openDialogConfirmDelContent(entry)"
+                          @click="openDialogConfirmDelContent(imagenesHorizontales[0])"
                         >
                           <v-icon color="error">mdi-delete</v-icon>
                         </v-btn>
                       </div>
+                    </v-card>
+                    <v-card
+                      rounded="lg"
+                      class="add-card d-flex flex-column align-center text-center pa-4"
+                      @click="openDialogEntryImgNew('h')"
+                      v-if="!imagenesHorizontales[0]"
+                    >
+                      <v-btn
+                        icon="mdi-plus"
+                        color="primary"
+                        fab
+                        class="floating-btn animate-pulse"
+                      ></v-btn>
+                      <v-card-title class="responsive-title mt-3"
+                        >Agregar Imagen Horizontal</v-card-title
+                      >
                     </v-card>
                   </v-col>
                   <v-col cols="12">
-                    <v-card rounded="lg">
+                    <v-card rounded="lg" v-if="imagenesHorizontales[1]">
                       <v-img
-                        :src="imagenNews2"
+                        :src="imagenesHorizontales[1].url_file"
                         class="rounded-lg"
                         height="100%"
                         cover
                       ></v-img>
                     </v-card>
-                    <v-card class="d-flex flex-wrap align-center pa-2">
+                    <v-card
+                      class="d-flex flex-wrap align-center pa-2"
+                      v-if="imagenesHorizontales[1]"
+                    >
                       <!-- Texto (subtitle) -->
                       <div class="text-caption flex-grow-1 text-wrap">
                         Imagen Horizontal
@@ -318,7 +359,7 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Editar imagen'"
-                          @click="openDialogEntryImg(entry)"
+                          @click="openDialogEntryImg(imagenesHorizontales[1])"
                         >
                           <v-icon color="primary">mdi-pencil</v-icon>
                         </v-btn>
@@ -327,11 +368,27 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Eliminar imagen'"
-                          @click="openDialogConfirmDelContent(entry)"
+                          @click="openDialogConfirmDelContent(imagenesHorizontales[1])"
                         >
                           <v-icon color="error">mdi-delete</v-icon>
                         </v-btn>
                       </div>
+                    </v-card>
+                    <v-card
+                      rounded="lg"
+                      class="add-card d-flex flex-column align-center text-center pa-4"
+                      @click="openDialogEntryImgNew('h')"
+                      v-if="!imagenesHorizontales[1]"
+                    >
+                      <v-btn
+                        icon="mdi-plus"
+                        color="primary"
+                        fab
+                        class="floating-btn animate-pulse"
+                      ></v-btn>
+                      <v-card-title class="responsive-title mt-3"
+                        >Agregar Imagen Horizontal</v-card-title
+                      >
                     </v-card>
                   </v-col>
                 </v-row>
@@ -810,6 +867,7 @@ const sectionTypeThis = ref(null);
 const imagenBanner = ref("");
 const itemEntry = ref([]);
 const orderedEntries = ref([]);
+const orderedFileEntries = ref([]);
 const visibleDialogHeader = ref(false);
 const titleDialogHeader = ref("");
 const setTitleHeader = ref("");
@@ -843,6 +901,8 @@ const loadingBtnDeleteContent = ref(false);
 const deleteItemContent = ref({});
 const overlay = ref(false);
 const validateYouTube = ref(false);
+const imagenVertical = ref(null);
+const imagenesHorizontales = ref([]);
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const responseMove = ref({
   operation: false,
@@ -897,8 +957,53 @@ const getDataAboutSection = async (id) => {
 
         itemEntry.value = sections[0].entryes;
 
+        // Mantener la lógica de contentEntries y la combinación general
         orderedEntries.value = combineAndSortEntries(itemEntry.value);
-        console.log(orderedEntries.value);
+
+        // Nueva variable con solo los fileEntries ordenados
+        orderedFileEntries.value = sortFileEntries(itemEntry.value);
+
+        console.log("Content & File Entries combinados:", orderedEntries.value);
+        console.log("File Entries ordenados:", orderedFileEntries.value);
+
+        const section = data.data.sectionList.sections[0];
+
+        // Extraer todas las imágenes de todas las entradas
+        let allImages = section.entryes
+          .flatMap((entry) => entry.fileEntries || []) // Asegurar que fileEntries exista
+          .filter((file) => file.file_type === "img"); // Filtrar solo imágenes
+
+        console.log("Todas las imágenes extraídas:", allImages);
+
+        // Filtrar la imagen vertical y las horizontales
+        const vertical = allImages.find((file) => file.orientation_img === "v");
+        const horizontales = allImages
+          .filter((file) => file.orientation_img === "h")
+          .slice(0, 2); // Tomar máximo 2 imágenes horizontales
+
+        // Guardar objeto con ID y URL en cada caso
+        imagenVertical.value = vertical
+          ? {
+              id: vertical.id,
+              entry_id: vertical.entry_id,
+              element_order: vertical.element_order,
+              url_file: `${graphqlImagesUrl}/${vertical.url_file}`,
+              file_type: vertical.file_type,
+              orientation_img: vertical.orientation_img,
+            }
+          : null;
+
+        imagenesHorizontales.value = horizontales.map((file) => ({
+          id: file.id,
+          entry_id: file.entry_id,
+          element_order: file.element_order,
+          url_file: `${graphqlImagesUrl}/${file.url_file}`,
+          file_type: file.file_type,
+          orientation_img: file.orientation_img,
+        }));
+
+        console.log("Imagen Vertical:", imagenVertical.value);
+        console.log("Imágenes Horizontales:", imagenesHorizontales.value);
 
         loadingData.value = false;
       } else {
@@ -1222,7 +1327,8 @@ const upsertEntryFileImg = async (
   entryId,
   fileImgEntry,
   fileType,
-  elementOrder
+  elementOrder,
+  orientation
 ) => {
   loadingBtnUploadImg.value = true;
   const initialMutation = PublicationMutations.setUpsertFileEntry({
@@ -1231,6 +1337,7 @@ const upsertEntryFileImg = async (
     url_file: true,
     element_order: elementOrder,
     file_type: fileType,
+    orientation_img: orientation,
   });
 
   console.log("Query generado:", initialMutation);
@@ -1279,7 +1386,8 @@ const upsertEntryFileImg = async (
             entryId,
             fileImgEntry,
             fileType,
-            elementOrder
+            elementOrder,
+            orientation
           )
         );
       } else {
@@ -1297,7 +1405,8 @@ const upsertEntryFileImg = async (
           entryId,
           fileImgEntry,
           fileType,
-          elementOrder
+          elementOrder,
+          orientation
         )
       );
     } else {
@@ -1389,7 +1498,7 @@ const upsertEntryContent = async (
 const combineAndSortEntries = (entryes) => {
   return entryes.map((entry) => {
     // Combinar contentEntries y fileEntries en un solo array
-    const combined = [...entry.contentEntries, ...entry.fileEntries];
+    const combined = [...entry.contentEntries];
 
     // Ordenar por element_order
     const sortedEntries = combined.sort(
@@ -1400,6 +1509,20 @@ const combineAndSortEntries = (entryes) => {
     return {
       ...entry,
       combinedEntries: sortedEntries,
+    };
+  });
+};
+
+const sortFileEntries = (entryes) => {
+  return entryes.map((entry) => {
+    // Ordenar solo fileEntries por element_order
+    const sortedFileEntries = [...entry.fileEntries].sort(
+      (a, b) => a.element_order - b.element_order
+    );
+
+    return {
+      ...entry,
+      sortedFileEntries, // Nuevo campo con solo los archivos ordenados
     };
   });
 };
@@ -1484,11 +1607,17 @@ const openDialogEntryContent = (item) => {
   entryContentSelected.value = item;
 
   switch (item.content_type) {
-    case "h2":
+    case "h3":
       titleDialogEntryContent.value = "Editar Título";
       setTextEntryContent.value = item.content;
       labelEntryContent.value = "Título";
       isParagraph.value = false;
+      break;
+    case "p":
+      titleDialogEntryContent.value = "Editar Párrafo";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "Párrafo";
+      isParagraph.value = true;
       break;
     case "p":
       titleDialogEntryContent.value = "Editar Párrafo";
@@ -1557,15 +1686,27 @@ const validateDataFormEntryImg = async () => {
   console.log(entryFileSelected.value);
 
   const entryFileId = entryFileSelected.value.id || null;
-  const entryId = entryFileSelected.value.entry_id;
+  let entryId = entryFileSelected.value.entry_id;
   const elementOrder = entryFileSelected.value.element_order;
+  const orientation = entryFileSelected.value.orientation_img;
+
+  if (entryId === null) {
+    console.log("entryId es null");
+    entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
+
+    if (!entryId) {
+      console.error("No se pudo crear la entrada.");
+      return; // Detiene la ejecución si no se creó correctamente
+    }
+  }
 
   await upsertEntryFileImg(
     entryFileId,
     entryId,
     uploadedFileEntryImg.value,
     "img",
-    elementOrder
+    elementOrder,
+    orientation
   );
 };
 
@@ -1829,33 +1970,29 @@ const updateEntryContent = async (entryContentId, entryId, elementOrder) => {
   }
 };
 
-const openDialogEntryImgNew = () => {
-  titleDialogUploadImg.value = "Cargar Imagen";
-  visibleDialogUploadImg.value = true;
-
-  // Obtener el último element_order
-  const combinedEntries = orderedEntries.value[0]?.combinedEntries || [];
-
-  let elementOrder = 0;
-
-  if (combinedEntries.length === 0) {
-    console.log("No hay elementos en combinedEntries. Último element_order: 0");
-    elementOrder = 1;
+const openDialogEntryImgNew = (orientation) => {
+  if (orientation === "v") {
+    titleDialogUploadImg.value = "Cargar Imagen Vertical";
   } else {
-    const lastElementOrder = Math.max(
-      ...combinedEntries.map((entry) => entry.element_order)
-    );
-    console.log("Último element_order:", lastElementOrder);
-    elementOrder = lastElementOrder + 1;
+    titleDialogUploadImg.value = "Cargar Imagen Horizontal";
+  }
+
+  visibleDialogUploadImg.value = true;
+  let entryId = null;
+
+  if (itemEntry.value.length > 0 && itemEntry.value[0].id) {
+    entryId = itemEntry.value[0].id;
   }
 
   entryFileSelected.value = {
     id: null,
-    entry_id: idEntryActive.value,
-    element_order: elementOrder,
+    entry_id: entryId,
+    element_order: 0,
+    orientation_img: orientation,
   };
 
   console.log(entryFileSelected.value);
+  //console.log(itemEntry.value);
 };
 
 const openDialogRequireContent = () => {
@@ -1923,7 +2060,7 @@ const openDialogEntryContentNew = (content_type) => {
     content_type: content_type,
     element_order: elementOrder,
   };
-
+  console.log(entryContentSelected.value);
   visibleDialogEntryContent.value = true;
 };
 

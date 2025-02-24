@@ -80,6 +80,14 @@ export default [
             "@/components/publication_components/news_folder/NewEntry.vue"
           ),
       },
+      {
+        path: "pagina-trabaja-con-nosotros",
+        name: "WorkOp",
+        component: () =>
+          import(
+            "@/components/publication_components/WorkWithUs.vue"
+          ),
+      },
     ],
   },
 ];

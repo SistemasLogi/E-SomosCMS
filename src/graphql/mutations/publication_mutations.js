@@ -245,6 +245,7 @@ export const PublicationMutations = {
     url_file = null,
     file_type = null,
     element_order = null,
+    orientation_img = null
   }) => {
     // Construcción del input dinámico
     let input = `entry_id: ${entry_id}`;
@@ -262,6 +263,10 @@ export const PublicationMutations = {
       input += `\n      url_file: $file_entry`;
     }
 
+    if (orientation_img) {
+      input += `\n      orientation_img: "${orientation_img}"`;
+    }
+
     // Si url_file está presente, se requiere la variable ($file_entry: Upload), de lo contrario, se omite
     const variables = url_file ? "($file_entry: Upload)" : "";
 
@@ -277,6 +282,7 @@ export const PublicationMutations = {
             url_file
             file_type
             element_order
+            orientation_img
           }
         }
       }

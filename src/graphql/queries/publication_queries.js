@@ -62,6 +62,7 @@ export const PublicationPublicQueries = {
                         url_file
                         file_type
                         element_order
+                        orientation_img
                     }
                 }
             }

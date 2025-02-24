@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row class="mt-12 ml-2">
-      <h2>Editar Pagina Noticias</h2>
+      <h2>Editar Pagina Trabaja con Nosotros</h2>
     </v-row>
     <v-row>
       <v-col cols="12">
@@ -44,8 +44,8 @@
       <v-col cols="12">
         <v-alert type="info" variant="tonal">
           <p style="color: black">
-            En esta sección podrás crear o editar secciones y configurar la
-            entrada para cada sección.
+            En esta sección podrás crear o editar secciones de ofertas laborales
+            y el asunto del correo electronico relacionado a cada oferta.
           </p>
         </v-alert>
       </v-col>
@@ -62,30 +62,29 @@
         </v-row>
 
         <v-row justify="center" class="gy-4" v-if="!loadingData">
-          <v-col cols="12" sm="6" md="6" lg="4" v-for="section in sectionRoute">
+          <v-col cols="12" v-for="section in sectionWork">
             <v-card class="mx-auto" :rounded="true" height="100%">
               <v-img
-                height="330"
                 cover
                 :src="graphqlImagesUrl + section.url_card_image"
               ></v-img>
 
-              <v-card-title
-                ><h3 style="color: #1c8c81">
-                  {{ section.section_title }}
-                </h3></v-card-title
-              >
               <v-card-text>
-                <p>{{ section.section_description }}</p>
+                <div class="d-flex justify-center mt-3">
+                  <v-btn
+                    class="text-none"
+                    color="primary"
+                    rounded="lg"
+                    size="large"
+                    >Postulate aqui
+                    <v-tooltip activator="parent" location="bottom"
+                      >Botón de ejemplo no funcional</v-tooltip
+                    >
+                  </v-btn>
+                </div>
               </v-card-text>
-              <v-card-subtitle
-                ><h4 style="color: #1c8c81">Leer mas...</h4>
-              </v-card-subtitle>
               <!-- Tarjeta para botones de acción -->
-              <v-card
-                variant="text"
-                class="mt-auto pa-2 d-flex justify-space-between"
-              >
+              <v-card variant="text" class="mt-auto pa-2 d-flex justify-end">
                 <v-btn
                   icon="mdi-pencil"
                   variant="text"
@@ -100,16 +99,9 @@
                   v-tooltip:top="'Eliminar sección'"
                   @click="openDialogConfirmSection(section)"
                 ></v-btn>
-                <v-btn
-                  icon="mdi-file-document-edit"
-                  color="dark"
-                  variant="text"
-                  v-tooltip:top="'Configurar entrada'"
-                  @click="configureEntry(section)"
-                ></v-btn>
               </v-card>
             </v-card>
-          </v-col>          
+          </v-col>
 
           <v-col cols="12" md="6" lg="4">
             <v-card
@@ -124,7 +116,7 @@
                 class="floating-btn animate-pulse"
               ></v-btn>
               <v-card-title class="responsive-title mt-3"
-                >Agregar Nueva Sección de Noticia</v-card-title
+                >Agregar Nueva Sección de Oferta</v-card-title
               >
             </v-card>
           </v-col>
@@ -327,27 +319,27 @@
             <v-col cols="12">
               <v-text-field
                 v-model="setTitleSection"
-                label="Título sección (titulo de la noticia)"
+                label="Título sección (nombre de la vacante)"
                 color="primary"
                 base-color="primary"
                 density="comfortable"
                 variant="solo-filled"
                 clearable
                 :rules="[rules.maxLengthRule(100)]"
-                hint="El título de la sección es el mismo que la cabecera de la página de entrada."
+                hint="El título de la sección es una referencia a la vacante."
               ></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-textarea
+              <v-text-field
                 v-model="setDescriptionSection"
-                label="Descripción o preámbulo de la noticia"
+                label="Asunto del correo electronico"
                 color="primary"
                 base-color="primary"
+                density="comfortable"
                 variant="solo-filled"
-                rows="3"
                 clearable
-                :rules="[rules.maxLengthRule(200)]"
-              ></v-textarea>
+                :rules="[rules.required, rules.maxLengthRule(150)]"
+              ></v-text-field>
             </v-col>
           </v-form>
         </v-col>
@@ -419,6 +411,7 @@
     </v-card>
   </v-dialog>
 </template>
+
 <script setup>
 import axios from "axios";
 import { shallowRef, ref, onMounted } from "vue";
@@ -427,6 +420,9 @@ import {
   graphqlServerUrl,
   graphqlImagesUrl,
   imagenRoute,
+  imagenNews1,
+  imagenNews2,
+  imagenNews3,
 } from "@/graphql/config";
 import {
   checkLocalStorageData,
@@ -443,8 +439,8 @@ const visibleError = ref(false);
 const textDialog = ref("");
 const cmsTitle = ref("");
 const imagenBanner = ref("");
-const sectionRoute = ref([]);
 const loadingData = ref(false);
+const sectionWork = ref([]);
 const visibleDialogHeader = ref(false);
 const titleDialogHeader = ref("");
 const imgEdit = ref(null);
@@ -501,7 +497,7 @@ const getDataRoutePage = async (id) => {
       if (status_code === 200 && cms_items.length > 0) {
         cmsTitle.value = cms_items[0].cms_item_title;
         imagenBanner.value = `${graphqlImagesUrl}/${cms_items[0].url_header_image}`;
-        sectionRoute.value = cms_items[0].sections;
+        sectionWork.value = cms_items[0].sections;
 
         loadingData.value = false;
 
@@ -579,7 +575,7 @@ const updateItemPageWithImage = async (
         dataMutation.updatePrincipalItem;
 
       if (status_code === 200) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         closeDialogHeader();
         loadingBtnEditHeader.value = false;
         uploadedFile.value = null;
@@ -642,7 +638,7 @@ const updateItemPage = async (itemId, itemTitle, textAdd) => {
         dataMutation.updatePrincipalItemNotImage;
 
       if (status_code === 200) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         loadingBtnEditHeader.value = false;
         closeDialogHeader();
       } else {
@@ -683,7 +679,7 @@ const validateDataForm = async () => {
 
   // Validar que se ha cargado un archivo
   if (!uploadedFile.value) {
-    updateItemPage(4, setTitleHeader.value, "");
+    updateItemPage(5, setTitleHeader.value, "");
     return;
   }
 
@@ -702,7 +698,7 @@ const validateDataForm = async () => {
   // Si pasa todas las validaciones, entonces se puede continuar
   //console.log("Archivo válido:", uploadedFile.value);
 
-  updateItemPageWithImage(4, setTitleHeader.value, uploadedFile.value, "");
+  updateItemPageWithImage(5, setTitleHeader.value, uploadedFile.value, "");
 };
 
 // Eliminar imagen de el encabezado
@@ -730,7 +726,7 @@ const deleteimageHeader = async (itemId) => {
         dataMutation.deletePrincipalItemImage;
 
       if (status_code === 200) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         loadingBtnDeleteImage.value = false;
         closeDialogConfirmHeader();
         closeDialogHeader();
@@ -787,7 +783,7 @@ const deleteSection = async (sectionId) => {
       const { status_code, status_message } = dataMutation.deleteSection;
 
       if (status_code === 200) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         closeDialogConfirmSection();
         loadingBtnDeleteSection.value = false;
       } else {
@@ -830,7 +826,7 @@ const validateDataFormSection = async () => {
   if (!uploadedFile.value) {
     await upsertSectionWithOutImage(
       idSectionEdit.value,
-      4,
+      5,
       setTitleSection.value,
       setDescriptionSection.value,
       "card"
@@ -855,7 +851,7 @@ const validateDataFormSection = async () => {
 
   await upsertSectionWithImage(
     idSectionEdit.value,
-    4,
+    5,
     setTitleSection.value,
     setDescriptionSection.value,
     "card",
@@ -900,7 +896,7 @@ const upsertSectionWithOutImage = async (
         dataMutation.upsertSection;
 
       if (status_code === 200 || status_code === 201) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         loadingBtnSection.value = false;
         closeDialogSection();
       } else {
@@ -992,7 +988,7 @@ const upsertSectionWithImage = async (
         dataMutation.upsertSection;
 
       if (status_code === 200 || status_code === 201) {
-        await getDataRoutePage(4);
+        await getDataRoutePage(5);
         closeDialogSection();
       } else {
         handleError({
@@ -1158,7 +1154,7 @@ onMounted(async () => {
   // Lógica basada en si el token existe o no
   if (tokenExists) {
     //console.log("EXISTE");
-    await getDataRoutePage(4);
+    await getDataRoutePage(5);
   } else {
     router.push("/");
   }

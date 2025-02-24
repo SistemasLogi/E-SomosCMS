@@ -108,6 +108,7 @@ export const menuItems = [
         title: "Pagina de Trabaja Con Nosotros",
         icon: "mdi-account-hard-hat",
         permission: 8,
+        route: { name: "WorkOp" },
       },
       {
         title: "Pie de Pagina",

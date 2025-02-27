@@ -88,6 +88,14 @@ export default [
             "@/components/publication_components/WorkWithUs.vue"
           ),
       },
+      {
+        path: "pie-de-pagina",
+        name: "FooterEnd",
+        component: () =>
+          import(
+            "@/components/publication_components/Footer.vue"
+          ),
+      },
     ],
   },
 ];

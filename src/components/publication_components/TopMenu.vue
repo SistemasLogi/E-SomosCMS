@@ -349,10 +349,10 @@ const getDataMenu = async (id) => {
 
         // Asignar valores a los logos y los IDs de las secciones
         logoLight.value = lightSection
-          ? `${graphqlImagesUrl}/${lightSection.url_header_image}`
+          ? `${graphqlImagesUrl}${lightSection.url_header_image}`
           : "";
         logoDark.value = darkSection
-          ? `${graphqlImagesUrl}/${darkSection.url_header_image}`
+          ? `${graphqlImagesUrl}${darkSection.url_header_image}`
           : "";
 
         idLight.value = lightSection ? lightSection.id : null;
@@ -419,10 +419,10 @@ const updateSectionWithImage = async (
       if (status_code === 200) {
         if (sectionTitle === "light") {
           idLight.value = section.id;
-          logoLight.value = `${graphqlImagesUrl}/${section.url_header_image}`;
+          logoLight.value = `${graphqlImagesUrl}${section.url_header_image}`;
         } else if (sectionTitle === "dark") {
           idDark.value = section.id;
-          logoDark.value = `${graphqlImagesUrl}/${section.url_header_image}`;
+          logoDark.value = `${graphqlImagesUrl}${section.url_header_image}`;
         }
         loadingBtn.value = false;
         closeDialogLight();

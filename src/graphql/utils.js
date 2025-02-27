@@ -114,6 +114,7 @@ export const menuItems = [
         title: "Pie de Pagina",
         icon: "mdi-page-layout-footer",
         permission: 9,
+        route: { name: "FooterEnd" },
       },
     ],
   },

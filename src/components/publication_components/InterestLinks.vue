@@ -113,9 +113,11 @@
                 v-for="social in link.socials"
                 :image="social.icon"
                 size="40"
-                style="cursor: pointer"
+                style="cursor: pointer"                
                 @click="openDialogLinkSocial(social)"
-              ></v-avatar>
+                v-tooltip:top="'Editar enlace '+ social.entryTitle"
+              >
+            </v-avatar>
             </v-card-subtitle>
             <v-card-actions>
               <v-btn
@@ -386,7 +388,7 @@
           text="Guardar"
           variant="flat"
           :loading="loadingBtnEditLinks"
-          @click="validateDataFormLinks()"
+          @click="validateDataFormLinks"
         ></v-btn>
       </v-card-actions>
     </v-card>
@@ -627,7 +629,7 @@ const getDataInterestLinks = async (id) => {
           idSection: section.id,
           name: section.section_title,
           image:
-            `${graphqlImagesUrl}/${section.url_header_image}` ||
+            `${graphqlImagesUrl}${section.url_header_image}` ||
             "default-image.jpg", // Imagen por defecto si es null
           socials: section.entryes.map((entry) => ({
             icon: mapSocialIcon(entry.entry_title), // Convertir el título en icono

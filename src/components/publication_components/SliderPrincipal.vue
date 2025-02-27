@@ -291,7 +291,7 @@ const getDataSlider = async (id) => {
         // Formatear los datos según los headers definidos
         itemsCarousel.value = sections.map((section) => ({
           id: section.id,
-          url_header_image: `${graphqlImagesUrl}/${section.url_header_image}`,
+          url_header_image: `${graphqlImagesUrl}${section.url_header_image}`,
           section_type: section.section_type,
         }));
 

@@ -500,7 +500,7 @@ const getDataRoutePage = async (id) => {
 
       if (status_code === 200 && cms_items.length > 0) {
         cmsTitle.value = cms_items[0].cms_item_title;
-        imagenBanner.value = `${graphqlImagesUrl}/${cms_items[0].url_header_image}`;
+        imagenBanner.value = `${graphqlImagesUrl}${cms_items[0].url_header_image}`;
         sectionRoute.value = cms_items[0].sections;
 
         loadingData.value = false;

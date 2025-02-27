@@ -748,7 +748,7 @@ const getDataAboutSection = async (id) => {
         sectionTypeThis.value = sections[0].section_type;
 
         if (sections[0].url_header_image) {
-          imagenBanner.value = `${graphqlImagesUrl}/${sections[0].url_header_image}`;
+          imagenBanner.value = `${graphqlImagesUrl}${sections[0].url_header_image}`;
         }
 
         itemEntry.value = sections[0].entryes;
@@ -1574,7 +1574,7 @@ const selectedEntries = computed(() => {
       // Concatenar graphqlImagesUrl solo para imágenes y PDFs
       url_file:
         entry.file_type === "img" || entry.file_type === "pdf"
-          ? `${graphqlImagesUrl}/${entry.url_file}`
+          ? `${graphqlImagesUrl}${entry.url_file}`
           : entry.url_file,
     })) || []
   );

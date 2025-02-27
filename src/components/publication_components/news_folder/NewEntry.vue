@@ -311,7 +311,9 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Eliminar imagen'"
-                          @click="openDialogConfirmDelContent(imagenesHorizontales[0])"
+                          @click="
+                            openDialogConfirmDelContent(imagenesHorizontales[0])
+                          "
                         >
                           <v-icon color="error">mdi-delete</v-icon>
                         </v-btn>
@@ -368,7 +370,9 @@
                           icon
                           variant="text"
                           v-tooltip:top="'Eliminar imagen'"
-                          @click="openDialogConfirmDelContent(imagenesHorizontales[1])"
+                          @click="
+                            openDialogConfirmDelContent(imagenesHorizontales[1])
+                          "
                         >
                           <v-icon color="error">mdi-delete</v-icon>
                         </v-btn>
@@ -838,13 +842,7 @@
 import axios from "axios";
 import { shallowRef, ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import {
-  graphqlServerUrl,
-  graphqlImagesUrl,
-  imagenNews1,
-  imagenNews2,
-  imagenNews3,
-} from "@/graphql/config";
+import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
 import {
   checkLocalStorageData,
   getTokenRefreshKeyCollaborator,
@@ -952,7 +950,7 @@ const getDataAboutSection = async (id) => {
         sectionTypeThis.value = sections[0].section_type;
 
         if (sections[0].url_header_image) {
-          imagenBanner.value = `${graphqlImagesUrl}/${sections[0].url_header_image}`;
+          imagenBanner.value = `${graphqlImagesUrl}${sections[0].url_header_image}`;
         }
 
         itemEntry.value = sections[0].entryes;
@@ -987,7 +985,7 @@ const getDataAboutSection = async (id) => {
               id: vertical.id,
               entry_id: vertical.entry_id,
               element_order: vertical.element_order,
-              url_file: `${graphqlImagesUrl}/${vertical.url_file}`,
+              url_file: `${graphqlImagesUrl}${vertical.url_file}`,
               file_type: vertical.file_type,
               orientation_img: vertical.orientation_img,
             }
@@ -997,7 +995,7 @@ const getDataAboutSection = async (id) => {
           id: file.id,
           entry_id: file.entry_id,
           element_order: file.element_order,
-          url_file: `${graphqlImagesUrl}/${file.url_file}`,
+          url_file: `${graphqlImagesUrl}${file.url_file}`,
           file_type: file.file_type,
           orientation_img: file.orientation_img,
         }));
@@ -1850,7 +1848,7 @@ const selectedEntries = computed(() => {
       // Concatenar graphqlImagesUrl solo para imágenes y PDFs
       url_file:
         entry.file_type === "img" || entry.file_type === "pdf"
-          ? `${graphqlImagesUrl}/${entry.url_file}`
+          ? `${graphqlImagesUrl}${entry.url_file}`
           : entry.url_file,
     })) || []
   );

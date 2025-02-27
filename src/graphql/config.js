@@ -13,3 +13,8 @@ export const imagenNews1 = new URL("@/assets/imagenes-corporativas/noticia-horiz
 export const imagenNews2 = new URL("@/assets/imagenes-corporativas/noticia-horizontal2.png", import.meta.url).href;
 
 export const imagenNews3 = new URL("@/assets/imagenes-corporativas/noticia-vertical.png", import.meta.url).href;
+
+export const isoImage = new URL("@/assets/imagenes-corporativas/iso_fontibon.png", import.meta.url).href;
+
+export const redesSocial1 = new URL("@/assets/images-social/facebook.png", import.meta.url).href;
+export const redesSocial2 = new URL("@/assets/images-social/instagram.png", import.meta.url).href;

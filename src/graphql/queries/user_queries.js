@@ -1,7 +1,11 @@
 export const UserCollaboratorQueries = {
-    getCollaboratorUserData: (collaborator_user_id) => `
+  getCollaboratorUserData: (collaborator_user_id) => `
     {
-        collaboratorUserData${collaborator_user_id ? `(collaborator_user_id: ${collaborator_user_id})` : ''} {
+        collaboratorUserData${
+          collaborator_user_id
+            ? `(collaborator_user_id: ${collaborator_user_id})`
+            : ""
+        } {
             status
             status_code
             status_message
@@ -24,7 +28,7 @@ export const UserCollaboratorQueries = {
         }
     }`,
 
-    getCollaboratorUserByToken: `
+  getCollaboratorUserByToken: `
     {
         collaboratorUserByToken {
             status
@@ -43,5 +47,27 @@ export const UserCollaboratorQueries = {
                 }                
             }
         }
-    }`
-  };
+    }`,
+
+  getRolesList: `
+    {
+        getRoles{
+            id
+            rol_name
+        }
+    }`,
+
+  getPermissionList: `
+    {
+        permissionList{
+            status
+            status_code
+            status_message
+            permissions{
+                id
+                permission_name
+                access_level
+            }
+        }
+    }`,
+};

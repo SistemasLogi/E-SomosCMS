@@ -10,6 +10,11 @@
             En esta sección podrás editar el datos relacionados al pie de
             pagina.
           </p>
+          <p style="color: black">
+            Pulsando en los iconos de redes sociales, puedes editarlos o
+            eliminarlos, para crear un nuevo enlace en una tarjeta, simplemente
+            haz clic en el botón de 'Add link' de la sección "Redes sociales".
+          </p>
         </v-alert>
       </v-col>
     </v-row>
@@ -164,7 +169,7 @@
                     color="primary"
                     rounded="lg"
                     size="small"
-                    append-icon="mdi-pencil"
+                    append-icon="mdi-plus"
                     @click="
                       openDialogAddEntry(
                         mergedSections.find(
@@ -172,9 +177,9 @@
                         )
                       )
                     "
-                    >Editar
+                    >Add link
                     <v-tooltip activator="parent" location="bottom"
-                      >Editar sección Redes Sociales</v-tooltip
+                      >Agregar enlace</v-tooltip
                     >
                   </v-btn>
                 </div>
@@ -228,8 +233,12 @@
           <v-card-title class="text-h6"> Lineas Guardadas </v-card-title>
           <v-card-text v-for="(line, index) in entryAddressExist" :key="index"
             >{{ line.entry_title }}
-            <v-icon color="primary"> mdi-pencil </v-icon>
-            <v-icon color="danger"> mdi-trash-can </v-icon>
+            <v-icon color="primary" @click="handleEditEntry(line)">
+              mdi-pencil
+            </v-icon>
+            <v-icon color="danger" @click="openDialogConfirmDeleteEntry(line)">
+              mdi-trash-can
+            </v-icon>
           </v-card-text>
         </v-card>
       </v-col>
@@ -239,8 +248,12 @@
           <v-card-title class="text-h6"> Datos Guardados </v-card-title>
           <v-card-text v-for="(line, index) in entryContactExist" :key="index"
             ><b>{{ line.entry_title }}:</b> {{ line.entry_complement }}
-            <v-icon color="primary"> mdi-pencil </v-icon>
-            <v-icon color="danger"> mdi-trash-can </v-icon>
+            <v-icon color="primary" @click="handleEditEntry(line)">
+              mdi-pencil
+            </v-icon>
+            <v-icon color="danger" @click="openDialogConfirmDeleteEntry(line)">
+              mdi-trash-can
+            </v-icon>
           </v-card-text>
         </v-card>
       </v-col>
@@ -577,6 +590,7 @@ const textDialogConfirmDeleteLink = ref("");
 const loadingBtnDeleteLink = ref(false);
 const entryAddressExist = ref([]);
 const entryContactExist = ref([]);
+const entrySelected = ref({});
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
 const rules = ref({
   required: (value) => !!value || "Requerido.",
@@ -954,6 +968,7 @@ const deleteEntryData = async (entryId) => {
         await getDataFooter(7);
         closeDialogConfirmLink();
         closeDialogLinks();
+        closeDialogEntry();
       } else {
         handleError({
           code: status_code,
@@ -1030,6 +1045,14 @@ const handleError = (response) => {
   codeError.value = `Error: ${response.code}`;
   textDialog.value = response.message;
   visibleError.value = true;
+};
+
+const handleEditEntry = (entry) => {
+  entrySelected.value = entry;
+  setTitleEntry.value = entry.entry_title;
+  setTextEntry.value = entry.entry_complement;
+  entryIdThis.value = entry.id;
+  console.log(entry);
 };
 
 const openDialogAddEntry = async (section) => {
@@ -1170,6 +1193,15 @@ const validateDataFormLinks = async () => {
   }
 };
 
+const openDialogConfirmDeleteEntry = (line) => {
+  linkTargetSelected.value = {};
+  titleConfirmDeleteLink.value = "Eliminar esta linea";
+  textDialogConfirmDeleteLink.value =
+    "¿Estás seguro de eliminar esta linea de texto?";
+  linkTargetSelected.value = line;
+  visibleDialogConfirmLink.value = true;
+};
+
 const openDialogLinkSocial = (social) => {
   linksExist.value = true;
   linkTargetSelected.value = {};
@@ -1205,6 +1237,12 @@ const closeDialogEntry = () => {
   imgEditUpload.value = null;
   selectedIcon.value = null;
   setUrlLink.value = "";
+  isAddressExist.value = false;
+  entryAddressExist.value = [];
+  isContactExist.value = false;
+  entryContactExist.value = [];
+  entrySelected.value = {};
+  entryIdThis.value = null;
 };
 
 const closeDialogLinks = () => {

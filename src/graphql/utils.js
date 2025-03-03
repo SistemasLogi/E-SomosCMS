@@ -122,5 +122,6 @@ export const menuItems = [
     title: "Administración Usuarios",
     icon: "mdi-account-cog",
     permission: 10,
+    route: { name: "AdministrationUsers" },
   },
 ];

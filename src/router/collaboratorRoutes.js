@@ -96,6 +96,14 @@ export default [
             "@/components/publication_components/Footer.vue"
           ),
       },
+      {
+        path: "administracion-usuarios",
+        name: "AdministrationUsers",
+        component: () =>
+          import(
+            "@/components/admin_components/UsersAdmin.vue"
+          ),
+      },
     ],
   },
 ];

@@ -260,7 +260,7 @@ const headers = ref([
     key: "id",
   },
   { title: "Imagen", key: "url_header_image" },
-  { title: "sección", key: "section_type" },
+  { title: "Sección", key: "section_type" },
   { title: "Acciones", key: "actions" },
 ]);
 const itemsCarousel = ref([]);

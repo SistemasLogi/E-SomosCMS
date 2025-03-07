@@ -426,7 +426,6 @@ import { useRouter } from "vue-router";
 import {
   graphqlServerUrl,
   graphqlImagesUrl,
-  imagenRoute,
 } from "@/graphql/config";
 import {
   checkLocalStorageData,
@@ -504,8 +503,7 @@ const getDataRoutePage = async (id) => {
         sectionRoute.value = cms_items[0].sections;
 
         loadingData.value = false;
-
-        console.log(cms_items);
+        //console.log(cms_items);
       } else {
         handleError({
           code: status_code,
@@ -548,9 +546,7 @@ const updateItemPageWithImage = async (
     itemTitle,
     textAdd
   );
-
-  console.log("Query generado:", initialMutation);
-
+  //console.log("Query generado:", initialMutation);
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -571,7 +567,7 @@ const updateItemPageWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -634,7 +630,7 @@ const updateItemPage = async (itemId, itemTitle, textAdd) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -722,7 +718,7 @@ const deleteimageHeader = async (itemId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -780,7 +776,7 @@ const deleteSection = async (sectionId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -892,7 +888,7 @@ const upsertSectionWithOutImage = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -961,9 +957,7 @@ const upsertSectionWithImage = async (
     section_type: sectionType,
     img_card: true,
   });
-
-  console.log("Query generado:", initialMutation);
-
+  //console.log("Query generado:", initialMutation);
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -984,7 +978,7 @@ const upsertSectionWithImage = async (
   formData.append("1", fileImgCard);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1048,7 +1042,7 @@ const slugify = (text) => {
 };
 
 const configureEntry = (section) => {
-  console.log("Configurar Entrada:", section);
+  //console.log("Configurar Entrada:", section);
   const cleanTitle = slugify(section.section_title);
 
   router.push({
@@ -1096,7 +1090,7 @@ const openDialogEditSection = (section) => {
     setDescriptionSection.value = section.section_description;
     visibleDialogEditSection.value = true;
     idSectionEdit.value = section.id;
-    console.log(section);
+    //console.log(section);
   } else {
     imgEditRoute.value = null;
     visibleDialogEditSection.value = true;

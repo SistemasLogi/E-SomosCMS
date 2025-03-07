@@ -561,7 +561,7 @@ const getDataAboutPage = async (id) => {
 
         loadingData.value = false;
 
-        console.log(cms_items);
+        //console.log(cms_items);
       } else {
         handleError({
           code: status_code,
@@ -589,7 +589,7 @@ const updateItemPageWithImage = async (
     textAdd
   );
 
-  console.log("Query generado:", initialMutation);
+  //console.log("Query generado:", initialMutation);
 
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
@@ -611,7 +611,7 @@ const updateItemPageWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -674,7 +674,7 @@ const updateItemPage = async (itemId, itemTitle, textAdd) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -731,7 +731,7 @@ const deleteimageHeader = async (itemId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -861,7 +861,7 @@ const upsertSectionWithOutImage = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -930,7 +930,7 @@ const deleteSection = async (sectionId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1020,7 +1020,7 @@ const openDialogEditSection = (section) => {
     selectedIcon.value = section.section_type;
     visibleDialogEditSection.value = true;
     idSectionEdit.value = section.id;
-    console.log(section);
+    //console.log(section);
   } else {
     visibleDialogEditSection.value = true;
     setTitleSection.value = "";
@@ -1081,7 +1081,7 @@ const slugify = (text) => {
 };
 
 const configureEntry = (section) => {
-  console.log("Configurar Entrada:", section);
+  //console.log("Configurar Entrada:", section);
   const cleanTitle = slugify(section.section_title);
 
   router.push({

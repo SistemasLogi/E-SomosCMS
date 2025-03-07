@@ -666,7 +666,7 @@ const getDataIcons = async () => {
         value: icon.icon_name, // Valor interno
       }));
 
-      console.log(itemsIcons.value);
+      //console.log(itemsIcons.value);
     } else {
       handleError({
         code: "500",
@@ -692,14 +692,12 @@ const getDataFooter = async (id) => {
       const { status_code, status_message, cms_items } = data.data.cmsItemList;
 
       if (status_code === 200 && cms_items.length > 0) {
-        console.log(cms_items);
-
+        //console.log(cms_items);
         const itemCms = cms_items[0];
         sections.value = cms_items[0].sections || [];
 
         loadingData.value = false;
-
-        console.log(links.value); // Verifica que los datos se actualizan correctamente
+        //console.log(links.value); // Verifica que los datos se actualizan correctamente
       } else {
         handleError({
           code: status_code,
@@ -741,7 +739,7 @@ const upsertSectionWithOutImage = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -806,8 +804,7 @@ const updateSectionWithImage = async (
     section_type: sectionType,
   });
 
-  console.log("Query generado:", initialMutation);
-
+  //console.log("Query generado:", initialMutation);
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -828,7 +825,7 @@ const updateSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -902,7 +899,7 @@ const upsertEntry = async (entryId, sectionId, entryTitle, entryComplement) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -950,7 +947,7 @@ const deleteEntryData = async (entryId) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -958,7 +955,7 @@ const deleteEntryData = async (entryId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1052,16 +1049,15 @@ const handleEditEntry = (entry) => {
   setTitleEntry.value = entry.entry_title;
   setTextEntry.value = entry.entry_complement;
   entryIdThis.value = entry.id;
-  console.log(entry);
+  //console.log(entry);
 };
 
 const openDialogAddEntry = async (section) => {
-  console.log(section); // Aquí ves toda la información de la sección
+  //console.log(section); // Aquí ves toda la información de la sección
   if (section) {
-    console.log("Título de la sección:", section.section_title);
-    console.log("Entradas:", section.entryes);
-    console.log("id de la sección:", section.id);
-
+    //console.log("Título de la sección:", section.section_title);
+    //console.log("Entradas:", section.entryes);
+    //console.log("id de la sección:", section.id);
     sectionThis.value = section;
 
     switch (section.section_title) {
@@ -1100,7 +1096,7 @@ const openDialogAddEntry = async (section) => {
         break;
     }
   } else {
-    console.log("No se encontró información de la sección.");
+    console.warn("No se encontró información de la sección.");
   }
   visibleDialogEntry.value = true;
 };
@@ -1108,7 +1104,7 @@ const openDialogAddEntry = async (section) => {
 const validateDataFormEntry = async () => {
   let idSection = sectionThis.value.id;
 
-  console.log(sectionThis.value);
+  //console.log(sectionThis.value);
   const { valid } = await formEntry.value.validate();
 
   if (!valid) {
@@ -1143,7 +1139,7 @@ const validateDataFormEntry = async () => {
     );
   } else {
     if (idSection === null) {
-      console.log("Esta sección aún no tiene un ID asignado.");
+      //console.log("Esta sección aún no tiene un ID asignado.");
       idSection = await upsertSectionWithOutImage(
         null,
         7,
@@ -1158,7 +1154,7 @@ const validateDataFormEntry = async () => {
     }
 
     if (sectionThis.value.section_type === "icon") {
-      console.log("Selecciono: ", selectedIcon.value);
+      //console.log("Selecciono: ", selectedIcon.value);
       await upsertEntry(
         entryIdThis.value,
         idSection,
@@ -1177,13 +1173,13 @@ const validateDataFormEntry = async () => {
 };
 
 const validateDataFormLinks = async () => {
-  console.log(linkTargetSelected.value);
+  //console.log(linkTargetSelected.value);
   const { valid } = await formLinks.value.validate();
   if (valid) {
-    console.log("Formulario válido");
+    //console.log("Formulario válido");
 
     if (linksExist.value) {
-      console.log("edit");
+      //console.log("edit");
       const entryId = linkTargetSelected.value.id;
       const sectionId = linkTargetSelected.value.section_id;
       const entryTitle = selectedIconEdit.value;
@@ -1213,7 +1209,7 @@ const openDialogLinkSocial = (social) => {
   // Asignar el valor al select (entryTitle coincide con icon_name)
   selectedIconEdit.value = social.entry_title;
   visibleDialogLinks.value = true;
-  console.log(social);
+  //console.log(social);
 };
 
 const openDialogConfirmDeleteLink = () => {

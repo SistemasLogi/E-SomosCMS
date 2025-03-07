@@ -226,7 +226,7 @@
 </template>
 <script setup>
 import axios from "axios";
-import { shallowRef, ref, onMounted, onUnmounted } from "vue";
+import { shallowRef, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
 import {
@@ -325,9 +325,7 @@ const upsertSectionWithImage = async (
     section_type: sectionType,
     img_header: true,
   });
-
-  console.log("Query generado:", initialMutation);
-
+  //console.log("Query generado:", initialMutation);
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -348,7 +346,7 @@ const upsertSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -418,7 +416,7 @@ const deleteSection = async (sectionId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;

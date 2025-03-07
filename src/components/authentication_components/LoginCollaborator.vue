@@ -96,7 +96,6 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from "vue";
-import ealimentacion from "@/assets/ealimentacion.png";
 import { UserAuthQueries } from "@/graphql/queries/auth_queries";
 import { graphqlServerUrl, logoCompany } from "@/graphql/config";
 import axios from "axios";

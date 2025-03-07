@@ -618,8 +618,7 @@ const getDataInterestLinks = async (id) => {
       if (status_code === 200 && cms_items.length > 0) {
         dataSection.value.title = cms_items[0].cms_item_title;
         dataSection.value.description = cms_items[0].text_add;
-        console.log(cms_items);
-
+        //console.log(cms_items);
         const itemCms = cms_items[0];
         const sections = cms_items[0].sections || [];
 
@@ -641,8 +640,7 @@ const getDataInterestLinks = async (id) => {
           })),
         }));
         loadingData.value = false;
-
-        console.log(links.value); // Verifica que los datos se actualizan correctamente
+        //console.log(links.value); // Verifica que los datos se actualizan correctamente
       } else {
         handleError({
           code: status_code,
@@ -682,7 +680,7 @@ const updateItemPage = async (itemId, itemTitle, textAdd) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -742,9 +740,7 @@ const upsertSectionWithImage = async (
     section_type: sectionType,
     img_header: true,
   });
-
-  console.log("Query generado:", initialMutation);
-
+  //console.log("Query generado:", initialMutation);
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -765,7 +761,7 @@ const upsertSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos.data.data);
+  //console.log(datos.data.data);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -847,7 +843,7 @@ const upsertSectionWithOutImage = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -921,7 +917,7 @@ const upsertEntry = async (entryId, sectionId, entryTitle, entryComplement) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -972,7 +968,7 @@ const deleteEntryData = async (entryId) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -980,7 +976,7 @@ const deleteEntryData = async (entryId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1039,7 +1035,7 @@ const deleteSection = async (sectionId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1162,17 +1158,16 @@ const validateDataFormTitle = async () => {
 const validateDataFormLinks = async () => {
   const { valid } = await formLinks.value.validate();
   if (valid) {
-    console.log("Formulario válido");
-
+    //console.log("Formulario válido");
     if (linksExist.value) {
-      console.log("edit");
+      //console.log("edit");
       const entryId = linkTargetSelected.value.entryId;
       const sectionId = linkTargetSelected.value.sectionId;
       const entryTitle = selectedIcon.value;
       const entryComplement = setUrlLink.value;
       await upsertEntry(entryId, sectionId, entryTitle, entryComplement);
     } else {
-      console.log("new");
+      //console.log("new");
       const entryId = null;
       const sectionId = linkTargetSelected.value.idSection;
       const entryTitle = selectedIcon.value;
@@ -1230,7 +1225,7 @@ const openDialogLinks = (link) => {
   //linksSelected.value = link;
   titleDialogLinks.value = "Agregar link en " + link.name;
   linkTargetSelected.value = link;
-  console.log(link);
+  //console.log(link);
 };
 
 const openDialogLinkSocial = (social) => {
@@ -1244,7 +1239,7 @@ const openDialogLinkSocial = (social) => {
   setUrlLink.value = social.entryUrl;
   // Asignar el valor al select (entryTitle coincide con icon_name)
   selectedIcon.value = social.entryTitle;
-  console.log(social);
+  //console.log(social);
 };
 
 const openDialogConfirmDeleteLink = () => {
@@ -1285,7 +1280,7 @@ const closeDialogConfirmTarget = () => {
 };
 
 const editEntry = (social) => {
-  console.log(social);
+  //console.log(social);
   setUrlLink.value = social.entryUrl;
 };
 

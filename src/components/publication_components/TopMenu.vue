@@ -534,7 +534,7 @@ const validateDataForm = async (identifier) => {
   } else if (identifier === 2) {
     updateSectionWithImage(idDark.value, 6, "dark", "div", uploadedFile.value);
   } else {
-    console.log("Identificador no válido");
+    console.error("Identificador no válido");
   }
 };
 

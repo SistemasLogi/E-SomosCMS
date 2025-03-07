@@ -741,7 +741,7 @@ const getDataAboutSection = async (id) => {
       const { status_code, status_message, sections } = data.data.sectionList;
 
       if (status_code === 200 && sections.length > 0) {
-        console.log(sections);
+        //console.log(sections);
 
         sectionTitle.value = sections[0].section_title;
         cmsItemIdThis.value = sections[0].cms_item_id;
@@ -754,7 +754,7 @@ const getDataAboutSection = async (id) => {
         itemEntry.value = sections[0].entryes;
 
         orderedEntries.value = combineAndSortEntries(itemEntry.value);
-        console.log(orderedEntries.value);
+        //console.log(orderedEntries.value);
 
         loadingData.value = false;
       } else {
@@ -787,7 +787,7 @@ const updateSectionWithImage = async (
     section_type: sectionType,
   });
 
-  console.log("Query generado:", initialMutation);
+  //console.log("Query generado:", initialMutation);
 
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
@@ -809,7 +809,7 @@ const updateSectionWithImage = async (
   formData.append("1", fileImgHeader);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -887,7 +887,7 @@ const updateSectionWithOutImage = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1031,7 +1031,7 @@ const deleteimageHeader = async (sectionId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1089,7 +1089,7 @@ const upsertEntryFileImg = async (
     file_type: fileType,
   });
 
-  console.log("Query generado:", initialMutation);
+  //console.log("Query generado:", initialMutation);
 
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
@@ -1111,7 +1111,7 @@ const upsertEntryFileImg = async (
   formData.append("1", fileImgEntry);
 
   const datos = await axios.post(graphqlServerUrl, formData, { headers });
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1183,7 +1183,7 @@ const upsertEntry = async (sectionId, entryTitle, entryComplement) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1242,7 +1242,7 @@ const upsertEntryContent = async (
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -1250,7 +1250,7 @@ const upsertEntryContent = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1335,8 +1335,7 @@ const refreshTokenAndRetry = async (callback) => {
 };
 
 const openDialogEntryContent = (item) => {
-  console.log("Elemento seleccionado:", item);
-
+  //console.log("Elemento seleccionado:", item);
   entryContentSelected.value = item;
 
   switch (item.content_type) {
@@ -1361,15 +1360,14 @@ const openDialogEntryContent = (item) => {
 const validateDataFormEntryContent = async () => {
   const { valid } = await formEntryContent.value.validate();
   if (valid) {
-    console.log("Formulario válido");
-
+    //console.log("Formulario válido");
     const entryContentId = entryContentSelected.value.id || null;
     let entryId = entryContentSelected.value.entry_id;
     const elementOrder = entryContentSelected.value.element_order;
     const contentType = entryContentSelected.value.content_type;
 
     if (entryId === null) {
-      console.log("entryId es null");
+      //console.log("entryId es null");
       entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
 
       if (!entryId) {
@@ -1407,16 +1405,15 @@ const validateDataFormEntryImg = async () => {
   }
 
   // Si pasa todas las validaciones, entonces se puede continuar
-  console.log("Archivo válido:", uploadedFileEntryImg.value);
+  //console.log("Archivo válido:", uploadedFileEntryImg.value);
 
-  console.log(entryFileSelected.value);
-
+  //console.log(entryFileSelected.value);
   const entryFileId = entryFileSelected.value.id || null;
   let entryId = entryFileSelected.value.entry_id;
   const elementOrder = entryFileSelected.value.element_order;
 
   if (entryId === null) {
-    console.log("entryId es null");
+    //console.log("entryId es null");
     entryId = await upsertEntry(sectionId.value, sectionTitle.value, ""); // Espera el ID generado
 
     if (!entryId) {
@@ -1445,7 +1442,7 @@ const deleteEntryContent = async (entryContentId) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -1453,7 +1450,7 @@ const deleteEntryContent = async (entryContentId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1497,7 +1494,7 @@ const deleteEntryFile = async (entryFileId) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -1505,7 +1502,7 @@ const deleteEntryFile = async (entryFileId) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1556,8 +1553,7 @@ const executeDeleteContent = async () => {
       console.warn("El elemento no tiene un tipo válido para eliminar.");
       return;
     }
-
-    console.log("Eliminación exitosa.");
+    //console.log("Eliminación exitosa.");
   } catch (error) {
     console.error("Error al eliminar contenido:", error);
   }
@@ -1592,7 +1588,7 @@ const updateEntryFile = async (entryFileId, entryId, elementOrder) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -1600,7 +1596,7 @@ const updateEntryFile = async (entryFileId, entryId, elementOrder) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1649,7 +1645,7 @@ const updateEntryContent = async (entryContentId, entryId, elementOrder) => {
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(deleteMutation);
+  //console.log(deleteMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -1657,7 +1653,7 @@ const updateEntryContent = async (entryContentId, entryId, elementOrder) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -1704,13 +1700,13 @@ const openDialogEntryImgNew = () => {
   let elementOrder = 0;
 
   if (combinedEntries.length === 0) {
-    console.log("No hay elementos en combinedEntries. Último element_order: 0");
+    //console.log("No hay elementos en combinedEntries. Último element_order: 0");
     elementOrder = 1;
   } else {
     const lastElementOrder = Math.max(
       ...combinedEntries.map((entry) => entry.element_order)
     );
-    console.log("Último element_order:", lastElementOrder);
+    //console.log("Último element_order:", lastElementOrder);
     elementOrder = lastElementOrder + 1;
   }
 
@@ -1719,12 +1715,11 @@ const openDialogEntryImgNew = () => {
     entry_id: idEntryActive.value,
     element_order: elementOrder,
   };
-
-  console.log(entryFileSelected.value);
+  //console.log(entryFileSelected.value);
 };
 
 const openDialogRequireContent = () => {
-  console.log("Contenido seleccionado:", radios.value);
+  //console.log("Contenido seleccionado:", radios.value);
   if (radios.value === "img") {
     openDialogEntryImgNew();
   }
@@ -1756,13 +1751,13 @@ const openDialogEntryContentNew = (content_type) => {
   let elementOrder = 0;
 
   if (combinedEntries.length === 0) {
-    console.log("No hay elementos en combinedEntries. Último element_order: 0");
+    //console.log("No hay elementos en combinedEntries. Último element_order: 0");
     elementOrder = 1;
   } else {
     const lastElementOrder = Math.max(
       ...combinedEntries.map((entry) => entry.element_order)
     );
-    console.log("Último element_order:", lastElementOrder);
+    //console.log("Último element_order:", lastElementOrder);
     elementOrder = lastElementOrder + 1;
   }
 
@@ -1777,7 +1772,7 @@ const openDialogEntryContentNew = (content_type) => {
 };
 
 const openDialogAddContent = () => {
-  console.log("Elementos ordenados:", orderedEntries.value[0]);
+  //console.log("Elementos ordenados:", orderedEntries.value[0]);
   if (orderedEntries.value[0] !== undefined) {
     idEntryActive.value = orderedEntries.value[0].id;
   } else {
@@ -1799,7 +1794,7 @@ const openDialogConfirmHeader = () => {
 };
 
 const openDialogEntryImg = (item) => {
-  console.log("Elemento seleccionado:", item);
+  //console.log("Elemento seleccionado:", item);
   titleDialogUploadImg.value = "Editar Imagen";
   imgEditUpload.value = item.url_file;
   visibleDialogUploadImg.value = true;
@@ -1807,7 +1802,7 @@ const openDialogEntryImg = (item) => {
 };
 
 const openDialogConfirmDelContent = (item) => {
-  console.log("Elemento seleccionado:", item);
+  //console.log("Elemento seleccionado:", item);
   messageContent.value = "¿Desea eliminar el elemento del contenido?";
   visibleDialogConfirmContent.value = true;
   deleteItemContent.value = item;
@@ -1874,9 +1869,8 @@ const moveUp = async (index) => {
     const itemToMove = combinedEntries[index];
     const itemSwapped = combinedEntries[index - 1];
 
-    console.log("Se mueve hacia arriba:", itemToMove);
-    console.log("Se intercambia con:", itemSwapped);
-
+    //console.log("Se mueve hacia arriba:", itemToMove);
+    //console.log("Se intercambia con:", itemSwapped);
     // Intercambiar element_order
     const tempOrder = itemToMove.element_order;
     itemToMove.element_order = itemSwapped.element_order;
@@ -1935,9 +1929,8 @@ const moveDown = async (index) => {
     const itemToMove = combinedEntries[index];
     const itemSwapped = combinedEntries[index + 1];
 
-    console.log("Se mueve hacia abajo:", itemToMove);
-    console.log("Se intercambia con:", itemSwapped);
-
+    //console.log("Se mueve hacia abajo:", itemToMove);
+    //console.log("Se intercambia con:", itemSwapped);
     // Intercambiar element_order
     const tempOrder = itemToMove.element_order;
     itemToMove.element_order = itemSwapped.element_order;
@@ -2000,7 +1993,7 @@ onMounted(async () => {
   // Lógica basada en si el token existe o no
   if (tokenExists) {
     sectionId.value = route.params.id;
-    console.log("EXISTE ", sectionId.value);
+    //console.log("EXISTE ", sectionId.value);
     await getDataAboutSection(sectionId.value);
     //await getDataAboutPage(2);
   } else {

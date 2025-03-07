@@ -310,15 +310,14 @@
 </template>
 <script setup>
 import axios from "axios";
-import { useRouter, useRoute } from "vue-router";
-import { ref, computed, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
 import {
-  menuItems,
   checkLocalStorageData,
   getTokenRefreshKeyCollaborator,
 } from "@/graphql/utils";
 import { UserCollaboratorQueries } from "@/graphql/queries/user_queries";
-import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
+import { graphqlServerUrl } from "@/graphql/config";
 import { UserMutations } from "@/graphql/mutations/user_mutations";
 
 const router = useRouter();
@@ -415,7 +414,7 @@ const dataUserCollaborator = async () => {
       },
       { headers }
     );
-    console.log(datos);
+    //console.log(datos);
     try {
       if (datos.data && datos.data.data) {
         const dataQuery = datos.data.data;
@@ -425,7 +424,7 @@ const dataUserCollaborator = async () => {
             dataQuery.collaboratorUserData;
 
           if (status_code === 200) {
-            console.log(collaborator_user);
+            //console.log(collaborator_user);
 
             itemsCollaborators.value = collaborator_user.map((user) => ({
               id: user.id,
@@ -483,13 +482,13 @@ const dataRoles = async () => {
       },
       { headers }
     );
-    console.log(datos);
+    //console.log(datos);
     try {
       if (datos.data && datos.data.data) {
         const dataQuery = datos.data.data;
 
         if (dataQuery.getRoles) {
-          console.log(dataQuery.getRoles);
+          //console.log(dataQuery.getRoles);
           // Mapea la respuesta al formato correcto para v-select
           itemsRoles.value = dataQuery.getRoles.map((role) => ({
             value: role.id,
@@ -536,7 +535,7 @@ const dataPermissions = async () => {
       },
       { headers }
     );
-    console.log(datos);
+    //console.log(datos);
     try {
       if (datos.data && datos.data.data) {
         const dataQuery = datos.data.data;
@@ -546,7 +545,7 @@ const dataPermissions = async () => {
             dataQuery.permissionList;
 
           if (status_code === 200) {
-            console.log(permissions);
+            //console.log(permissions);
             itemsPermissions.value = permissions;
           } else {
             //console.log(status_message);
@@ -610,7 +609,7 @@ const createUser = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -618,7 +617,7 @@ const createUser = async (
         dataMutation.createCollaboratorUser;
 
       if (status_code === 200 || status_code === 201) {
-        console.log(collaborator_user);
+        //console.log(collaborator_user);
         await dataUserCollaborator();
         closeDialogUserData();
 
@@ -697,7 +696,7 @@ const updateUser = async (
     Authorization: `Bearer ${token}`,
   };
 
-  console.log(updateMutation);
+  //console.log(updateMutation);
 
   const datos = await axios.post(
     graphqlServerUrl,
@@ -706,7 +705,7 @@ const updateUser = async (
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -714,7 +713,7 @@ const updateUser = async (
         dataMutation.updateCollaboratorUser;
 
       if (status_code === 200 || status_code === 201) {
-        console.log(collaborator_user);
+        //console.log(collaborator_user);
         await dataUserCollaborator();
         closeDialogUserData();
       } else {
@@ -771,15 +770,13 @@ const updatePermissions = async (userId, permissions_array) => {
     permissions: permissions_array,
   });
 
-  console.log(updateMutation);
+  //console.log(updateMutation);
 
   const token = localStorage.TokenCollaboratorCms;
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-
-  console.log(updateMutation);
-
+  //console.log(updateMutation);
   const datos = await axios.post(
     graphqlServerUrl,
     {
@@ -787,7 +784,7 @@ const updatePermissions = async (userId, permissions_array) => {
     },
     { headers }
   );
-  console.log(datos);
+  //console.log(datos);
   try {
     if (datos && datos.data && datos.data.data) {
       const dataMutation = datos.data.data;
@@ -835,8 +832,7 @@ const handleError = (response) => {
 
 const validateDataFormUserData = async () => {
   const { valid } = await formUserData.value.validate();
-
-  console.log(modelStatus.value);
+  //console.log(modelStatus.value);
 
   if (valid) {
     if (idUser.value !== null) {
@@ -872,9 +868,9 @@ const validateDataFormPermissions = async () => {
     .filter((key) => selectedPermissions.value[key]) // Filtra solo los activados (true)
     .map(Number); // Convierte las claves a números
 
-  console.log("Permisos activados:", permissionsArray);
+  //console.log("Permisos activados:", permissionsArray);
 
-  console.log(idUser.value);
+  //console.log(idUser.value);
 
   // Aquí puedes pasar los permisos a la mutación
   // executeMutation({ user_id: userId.value, permissions: permissionsArray });
@@ -900,7 +896,7 @@ const refreshTokenAndRetry = async (callback) => {
 
 const openDialogUserData = (item, isEdit) => {
   if (isEdit) {
-    console.log(item);
+    //console.log(item);
     const statusCode = item.collaborator_status === 1 ? true : false; // Captura el estado del switch
     idUser.value = item.id;
     titleDialogUserData.value = "Editar usuario";
@@ -925,13 +921,13 @@ const openDialogUserData = (item, isEdit) => {
 
 const openDialogPermissions = (item) => {
   if (item.roles_id === 1) {
-    console.log("Administrador");
+    //console.log("Administrador");
     openDialogInfo();
   } else if (item.roles_id === 2) {
     visibleDialogPermissions.value = true;
     nameUserPermissions.value = item.collaborator_name;
     idUser.value = item.id;
-    console.log(item);
+    //console.log(item);
 
     // Resetear el estado de los permisos
     selectedPermissions.value = {};
@@ -945,7 +941,7 @@ const openDialogPermissions = (item) => {
       selectedPermissions.value[perm.permission_id] = true;
     });
 
-    console.log("Permisos asignados:", selectedPermissions.value);
+    //console.log("Permisos asignados:", selectedPermissions.value);
   }
 };
 

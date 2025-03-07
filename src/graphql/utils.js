@@ -33,7 +33,7 @@ export async function getTokenRefreshKeyCollaborator(enciptedKey) {
         return { code: status_code, message: status_message };
       }
     } else {
-      console.log(datosRefresh);
+      //console.log(datosRefresh);
       return { code: 500, message: "Unexpected error on server" };
     }
   } catch (error) {

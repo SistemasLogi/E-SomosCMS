@@ -139,7 +139,7 @@ import {
   getTokenRefreshKeyCollaborator,
 } from "@/graphql/utils";
 import { UserCollaboratorQueries } from "@/graphql/queries/user_queries";
-import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
+import { graphqlServerUrl } from "@/graphql/config";
 
 const drawer = ref(true);
 const rail = ref(true);
@@ -178,7 +178,7 @@ const dataUserCollaborator = async () => {
       },
       { headers }
     );
-    console.log(datos);
+    //console.log(datos);
     const errors = [];
     try {
       if (datos.data && datos.data.data) {
@@ -213,7 +213,7 @@ const dataUserCollaborator = async () => {
         }
       }
     } catch (error) {
-      console.log(datos.data.errors[0].extensions.debugMessage);
+      //console.log(datos.data.errors[0].extensions.debugMessage);
       if (datos.data.errors[0].extensions.debugMessage == "Token has expired") {
         await refreshTokenAndRetry(() => dataUserCollaborator());
       }
@@ -308,7 +308,7 @@ onMounted(async () => {
 
   // Lógica basada en si el token existe o no
   if (tokenExists) {
-    console.log("EXISTE");
+    //console.log("EXISTE");
     await dataUserCollaborator();
   } else {
     router.push("/");

@@ -62,56 +62,72 @@
         </v-row>
 
         <v-row justify="center" class="gy-4" v-if="!loadingData">
-          <v-col cols="12" md="6" lg="4" v-for="section in sectionRoute">
-            <v-card
-              class="real-estate-card"
-              data-aos="fade-up"
-              :data-aos-delay="100"
+          <template
+            v-for="(sections, groupName) in groupedSections"
+            :key="groupName"
+          >
+            <!-- Título del grupo -->
+            <v-col cols="12" class="text-center">
+              <h2>{{ groupName }}</h2>
+            </v-col>
+
+            <!-- Secciones dentro del grupo -->
+            <v-col
+              cols="12"
+              md="6"
+              lg="4"
+              v-for="section in sections"
+              :key="section.id"
             >
-              <!-- Imagen con ajuste absoluto -->
-              <v-img
-                :src="graphqlImagesUrl + section.url_card_image"
-                alt="Imagen de ruta"
-                class="real-estate-img"
-              ></v-img>
+              <v-card
+                class="real-estate-card"
+                data-aos="fade-up"
+                :data-aos-delay="100"
+              >
+                <v-img
+                  :src="graphqlImagesUrl + section.url_card_image"
+                  alt="Imagen de ruta"
+                  class="real-estate-img"
+                ></v-img>
 
-              <!-- Overlay para degradado -->
-              <div class="real-estate-overlay"></div>
+                <div class="real-estate-overlay"></div>
 
-              <!-- Contenido en la parte inferior -->
-              <v-card-text class="real-estate-content">
-                <v-chip variant="outlined" color="primary">
-                  <b style="color: aliceblue">Ver Ruta</b>
-                </v-chip>
-                <h3 class="real-estate-title">{{ section.section_title }}</h3>
-              </v-card-text>
-            </v-card>
-            <!-- Tarjeta para botones de acción -->
-            <v-card class="mt-2 d-flex justify-space-around pa-2">
-              <v-btn
-                icon="mdi-pencil"
-                variant="text"
-                color="primary"
-                v-tooltip:top="'Editar sección'"
-                @click="openDialogEditSection(section)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-trash-can"
-                color="error"
-                variant="text"
-                v-tooltip:top="'Eliminar sección'"
-                @click="openDialogConfirmSection(section)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-file-document-edit"
-                color="dark"
-                variant="text"
-                v-tooltip:top="'Configurar entrada'"
-                @click="configureEntry(section)"
-              ></v-btn>
-            </v-card>
-          </v-col>
+                <v-card-text class="real-estate-content">
+                  <v-chip variant="outlined" color="primary">
+                    <b style="color: aliceblue">Ver Ruta</b>
+                  </v-chip>
+                  <h3 class="real-estate-title">{{ section.section_title }}</h3>
+                </v-card-text>
+              </v-card>
 
+              <!-- Tarjeta para botones de acción -->
+              <v-card class="mt-2 d-flex justify-space-around pa-2">
+                <v-btn
+                  icon="mdi-pencil"
+                  variant="text"
+                  color="primary"
+                  v-tooltip:top="'Editar sección'"
+                  @click="openDialogEditSection(section)"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-trash-can"
+                  color="error"
+                  variant="text"
+                  v-tooltip:top="'Eliminar sección'"
+                  @click="openDialogConfirmSection(section)"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-file-document-edit"
+                  color="dark"
+                  variant="text"
+                  v-tooltip:top="'Configurar entrada'"
+                  @click="configureEntry(section)"
+                ></v-btn>
+              </v-card>
+            </v-col>
+          </template>
+
+          <!-- Botón para agregar una nueva sección -->
           <v-col cols="12" md="6" lg="4">
             <v-card
               rounded="lg"
@@ -124,9 +140,9 @@
                 fab
                 class="floating-btn animate-pulse"
               ></v-btn>
-              <v-card-title class="responsive-title mt-3"
-                >Agregar Nueva Sección de Ruta</v-card-title
-              >
+              <v-card-title class="responsive-title mt-3">
+                Agregar Nueva Sección de Ruta
+              </v-card-title>
             </v-card>
           </v-col>
         </v-row>
@@ -289,7 +305,7 @@
   <v-dialog v-model="visibleDialogEditSection" max-width="700" persistent>
     <v-card rounded="lg">
       <v-card-title class="d-flex justify-space-between align-center">
-        Editar Sección
+        {{ titleDialogSection }}
         <v-btn
           icon="mdi-close"
           variant="text"
@@ -303,7 +319,7 @@
         <v-card>
           <v-img
             class="bg-grey-lighten-2"
-            max-height="300"
+            max-height="200"
             :src="imgEditRoute"
           ></v-img>
           <v-card-title class="text-h6"> Imagen Actual </v-card-title>
@@ -324,6 +340,34 @@
               <span v-if="errorMessage" class="error-message">
                 {{ errorMessage }}
               </span>
+            </v-col>
+            <v-col cols="12">
+              <v-radio-group
+                v-model="selectedGroup"
+                inline
+                color="primary"
+                @update:modelValue="setGroupSection = selectedGroup"
+              >
+                <v-radio
+                  v-for="(sections, groupName) in groupedSections"
+                  :key="groupName"
+                  :label="groupName"
+                  :value="groupName"
+                ></v-radio>
+              </v-radio-group>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="setGroupSection"
+                label="Nombre del grupo"
+                color="primary"
+                base-color="primary"
+                density="comfortable"
+                variant="solo-filled"
+                clearable
+                :rules="[rules.maxLengthRule(50), rules.required]"
+                hint="Seleccione un grupo o digite uno nuevo."
+              ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -411,7 +455,7 @@
 
 <script setup>
 import axios from "axios";
-import { shallowRef, ref, onMounted } from "vue";
+import { shallowRef, ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { graphqlServerUrl, graphqlImagesUrl } from "@/graphql/config";
 import {
@@ -451,7 +495,10 @@ const visibleDialogConfirmSection = ref(false);
 const loadingBtnDeleteSection = ref(false);
 const titleConfirmDeleteSection = ref("");
 const textDialogConfirmDeleteSection = ref("");
+const titleDialogSection = ref("");
 const allowedFormats = ["image/jpeg", "image/png", "image/bmp", "image/jpg"];
+const selectedGroup = ref(""); // Radio seleccionado
+const setGroupSection = ref(""); // Campo de texto
 const rules = ref({
   required: (value) => !!value || "Requerido.",
   min: (v) => v.length >= 8 || "Minimo 8 caracteres",
@@ -814,7 +861,8 @@ const validateDataFormSection = async () => {
       idSectionEdit.value,
       3,
       setTitleSection.value,
-      "card"
+      "card",
+      setGroupSection.value
     );
     return;
   }
@@ -839,6 +887,7 @@ const validateDataFormSection = async () => {
     3,
     setTitleSection.value,
     "card",
+    setGroupSection.value,
     uploadedFile.value
   );
 };
@@ -848,7 +897,8 @@ const upsertSectionWithOutImage = async (
   sectionId,
   cmsItemId,
   sectionTitle,
-  sectionType
+  sectionType,
+  sectionDescription
 ) => {
   loadingBtnSection.value = true;
   const updateMutation = PublicationMutations.setUpsertSectionWithoutImage({
@@ -856,6 +906,7 @@ const upsertSectionWithOutImage = async (
     cms_item_id: cmsItemId,
     section_title: sectionTitle,
     section_type: sectionType,
+    section_description: sectionDescription,
   });
 
   const token = localStorage.TokenCollaboratorCms;
@@ -894,7 +945,8 @@ const upsertSectionWithOutImage = async (
             sectionId,
             cmsItemId,
             sectionTitle,
-            sectionType
+            sectionType,
+            sectionDescription
           )
         );
       } else {
@@ -911,7 +963,8 @@ const upsertSectionWithOutImage = async (
           sectionId,
           cmsItemId,
           sectionTitle,
-          sectionType
+          sectionType,
+          sectionDescription
         )
       );
     } else {
@@ -925,6 +978,7 @@ const upsertSectionWithImage = async (
   cmsItemId,
   sectionTitle,
   sectionType,
+  sectionDescription,
   fileImgCard
 ) => {
   loadingBtnSection.value = true;
@@ -933,6 +987,7 @@ const upsertSectionWithImage = async (
     cms_item_id: cmsItemId,
     section_title: sectionTitle,
     section_type: sectionType,
+    section_description: sectionDescription,
     img_card: true,
   });
   //console.log("Query generado:", initialMutation);
@@ -980,6 +1035,7 @@ const upsertSectionWithImage = async (
             cmsItemId,
             sectionTitle,
             sectionType,
+            sectionDescription,
             fileImgCard
           )
         );
@@ -998,6 +1054,7 @@ const upsertSectionWithImage = async (
           cmsItemId,
           sectionTitle,
           sectionType,
+          sectionDescription,
           fileImgCard
         )
       );
@@ -1065,12 +1122,15 @@ const openDialogEditSection = (section) => {
     setTitleSection.value = section.section_title;
     visibleDialogEditSection.value = true;
     idSectionEdit.value = section.id;
+    titleDialogSection.value = "Editar Sección";
+    setGroupSection.value = section.section_description;
     //console.log(section);
   } else {
     imgEditRoute.value = null;
     visibleDialogEditSection.value = true;
     setTitleSection.value = "";
     idSectionEdit.value = null;
+    titleDialogSection.value = "Crear Sección";
   }
 };
 
@@ -1104,6 +1164,8 @@ const closeDialogSection = () => {
   idSectionEdit.value = null;
   uploadedFile.value = null;
   errorMessage.value = "";
+  setGroupSection.value = "";
+  selectedGroup.value = "";
 };
 
 const closeDialogConfirmSection = () => {
@@ -1118,6 +1180,24 @@ const closeDialog = () => {
   closeDialogConfirmSection();
   visibleError.value = false;
 };
+
+// Sincronizar selección del radio con el campo de texto
+watch(selectedGroup, (newValue) => {
+  setGroupSection.value = newValue;
+});
+
+const groupedSections = computed(() => {
+  const groups = {};
+
+  sectionRoute.value.forEach((section) => {
+    if (!groups[section.section_description]) {
+      groups[section.section_description] = [];
+    }
+    groups[section.section_description].push(section);
+  });
+
+  return groups;
+});
 
 onMounted(async () => {
   const tokenExists = checkLocalStorageData("TokenCollaboratorCms");

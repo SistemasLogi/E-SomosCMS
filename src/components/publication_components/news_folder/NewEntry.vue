@@ -1608,17 +1608,23 @@ const openDialogEntryContent = (item) => {
       labelEntryContent.value = "Título";
       isParagraph.value = false;
       break;
-    case "p":
-      titleDialogEntryContent.value = "Editar Párrafo";
+    case "h4":
+      titleDialogEntryContent.value = "Editar Subtítulo";
       setTextEntryContent.value = item.content;
-      labelEntryContent.value = "Párrafo";
-      isParagraph.value = true;
+      labelEntryContent.value = "Subtítulo";
+      isParagraph.value = false;
       break;
     case "p":
       titleDialogEntryContent.value = "Editar Párrafo";
       setTextEntryContent.value = item.content;
       labelEntryContent.value = "Párrafo";
       isParagraph.value = true;
+      break;
+    case "vi":
+      titleDialogEntryContent.value = "Editar link de video";
+      setTextEntryContent.value = item.content;
+      labelEntryContent.value = "link de video";
+      isParagraph.value = false;
       break;
     default:
       break;

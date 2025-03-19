@@ -66,7 +66,7 @@
           class="mt-5 mb-5 ml-12 mr-12"
           v-if="!loadingData"
         >
-          <v-col cols="12" sm="6" lg="4" v-for="section in sectionAbout">
+          <v-col cols="12" lg="4" md="6" v-for="section in sectionAbout">
             <v-card rounded="lg" style="height: 300px">
               <v-card-text>
                 <v-avatar color="primary" size="50" @click="">

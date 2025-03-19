@@ -312,7 +312,7 @@
               </p>
             </v-alert>
             <v-row>
-              <v-col cols="4">
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="setTitleEntry"
                   label="Etiqueta"
@@ -325,7 +325,7 @@
                   :rules="[rules.required, rules.maxLengthRule(30)]"
                 ></v-text-field>
               </v-col>
-              <v-col cols="8">
+              <v-col cols="12" md="8">
                 <v-text-field
                   v-model="setTextEntry"
                   label="Campo datos"
